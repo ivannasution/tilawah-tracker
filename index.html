@@ -1682,10 +1682,7 @@ async function connectGs() {
   const url = document.getElementById('gsUrl').value.trim();
   if (!url) { alert('Please enter a URL.'); return; }
   if (!url.includes('script.google.com')) {
-    alert('Please paste the Apps Script Web App URL (not the Google Sheet URL).
-
-It should look like:
-https://script.google.com/macros/s/.../exec');
+    alert('Please paste the Apps Script Web App URL (not the Google Sheet URL). It should look like: https://script.google.com/macros/s/.../exec');
     return;
   }
   localStorage.setItem('tq2_gs', url);
