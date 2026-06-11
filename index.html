@@ -944,7 +944,7 @@ function pickSetupSurah(n){
 function updateSetupPreview(){
   if(!setupSelSurah)return;
   const ayah=parseInt(document.getElementById('setupAyahInput').value)||1;
-  const pg=ayahToPage(setupSelSurah,ayah);
+  const pg = ayah<=1 ? setupSelSurah.sp : ayahToPage(setupSelSurah,ayah);
   const juz=pageToJuz(pg);
   const doneJuzCount=completedJuz(pg-1); // juz fully completed BEFORE this page
   const prev=document.getElementById('setupPagePreview');
@@ -959,7 +959,10 @@ function createProfile(){
   if(setupSelSurah){
     const ayah=parseInt(document.getElementById('setupAyahInput').value)||1;
     // startPg = pages already read = position page - 1 (current page not yet fully read counts as "to start next from")
-    startPg=Math.max(0,ayahToPage(setupSelSurah,ayah)-1);
+    // startPg = pages already completed before current position
+    // If starting from ayah 1 of a surah, use surah.sp - 1 exactly
+    const startPosPg = ayah<=1 ? setupSelSurah.sp : ayahToPage(setupSelSurah,ayah);
+    startPg=Math.max(0, startPosPg - 1);
     curSurahN=setupSelSurah.n;
     curAyah=ayah;
   }
@@ -1005,7 +1008,7 @@ function goTab(tab){
 // ═══════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════
-const todayStr=()=>new Date().toISOString().slice(0,10);
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 function prevDay(d){const dt=new Date(d);dt.setDate(dt.getDate()-1);return dt.toISOString().slice(0,10);}
 function addDays(d,n){const dt=new Date(d);dt.setDate(dt.getDate()+n);return dt.toISOString().slice(0,10);}
 function fmtDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
