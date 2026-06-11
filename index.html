@@ -570,10 +570,17 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
         <div class="gss-title">Google Sheets Sync</div>
         <div class="gss-st"><div class="gss-sdot" id="gsDot"></div><span id="gsTxt">Not connected</span></div>
       </div>
-      <div class="gss-desc">Connect your Google Sheet to auto-sync every session. Use a Google Apps Script Web App URL as the endpoint.</div>
+      <div class="gss-desc">Connect your Google Sheet to auto-sync every session.</div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Apps Script Web App URL</div>
       <div class="gs-url-row">
-        <input class="gs-url-inp" id="gsUrl" placeholder="https://docs.google.com/spreadsheets/d/…" type="url">
+        <input class="gs-url-inp" id="gsUrl" placeholder="https://script.google.com/macros/s/…/exec" type="url">
         <button class="gs-con" onclick="connectGs()">Connect</button>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;margin-top:10px;">Google Sheet URL</div>
+      <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px;">Paste your sheet URL here so the Open Sheet button opens the spreadsheet directly.</div>
+      <div class="gs-url-row">
+        <input class="gs-url-inp" id="gsSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…" type="url">
+        <button class="gs-con" onclick="saveSheetUrl()" style="background:var(--purp);">Save</button>
       </div>
       <div class="gs-acts">
         <button class="ga ga-s" onclick="syncNow()">↑ Sync Now</button>
@@ -1405,6 +1412,8 @@ function renderStats(){
   } else {
     updateSyncStatus('none');
   }
+  const gsSheetUrl=localStorage.getItem('tq2_gs_sheet');
+  if(gsSheetUrl) document.getElementById('gsSheetUrl').value=gsSheetUrl;
 }
 
 // ═══════════════════════════════════════════════
@@ -1693,9 +1702,29 @@ async function syncNow() {
 }
 
 function openGs() {
-  const url = localStorage.getItem('tq2_gs');
-  if (url) window.open(url, '_blank');
-  else alert('No sheet connected yet.');
+  const sheetUrl = localStorage.getItem('tq2_gs_sheet');
+  if (sheetUrl) {
+    window.open(sheetUrl, '_blank');
+  } else {
+    const url = prompt('Paste your Google Sheet URL (docs.google.com/spreadsheets/…):');
+    if (url && url.includes('docs.google.com')) {
+      localStorage.setItem('tq2_gs_sheet', url);
+      window.open(url, '_blank');
+    } else if (url) {
+      alert('That doesn\'t look like a Google Sheet URL. Please paste the URL from the address bar when your sheet is open.');
+    }
+  }
+}
+
+function saveSheetUrl() {
+  const url = document.getElementById('gsSheetUrl').value.trim();
+  if (!url) { alert('Please paste your Google Sheet URL.'); return; }
+  if (!url.includes('docs.google.com')) {
+    alert('Please paste the Google Sheet URL (from docs.google.com), not the Apps Script URL.');
+    return;
+  }
+  localStorage.setItem('tq2_gs_sheet', url);
+  toast('✓ Sheet URL saved — Open Sheet will now go to your spreadsheet.');
 }
 
 // Close dropdown on outside tap
