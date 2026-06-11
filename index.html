@@ -1329,8 +1329,9 @@ function saveLog(){
   save();
   const juzMsg=nowDone>prevDone?` 🎉 Juz ${nowDone} complete!`:'';
   toast(`✓ ${pg} page${pg!==1?'s':''} saved!${juzMsg}`);
+  // Auto-sync new entry to Google Sheets
   const gsUrl=localStorage.getItem('tq2_gs');
-  if(gsUrl)console.log('GSheet sync stub:',entry);
+  if(gsUrl) postToSheet(entryPayload(entry, p.name));
   if(justKhatam){
     // Show khatam modal after short delay
     setTimeout(()=>{
@@ -1398,7 +1399,12 @@ function renderStats(){
     }).join('');
   }else pr.innerHTML='<div class="empty-state" style="padding:12px;">Log sessions to see predictions</div>';
   const gsUrl=localStorage.getItem('tq2_gs');
-  if(gsUrl){document.getElementById('gsUrl').value=gsUrl;document.getElementById('gsDot').style.background='var(--grn)';document.getElementById('gsTxt').style.color='var(--grn)';document.getElementById('gsTxt').textContent='Connected';}
+  if(gsUrl){
+    document.getElementById('gsUrl').value=gsUrl;
+    updateSyncStatus('connected');
+  } else {
+    updateSyncStatus('none');
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1541,6 +1547,17 @@ function saveEditLog(){
   save();
   closeModal('editLogModal');
   toast('✓ Session updated!');
+  // Sync edit to GSheet
+  const gsUrlE = localStorage.getItem('tq2_gs');
+  if(gsUrlE){
+    const edited = p.logs[idx];
+    postToSheet({action:'edit', profile:p.name,
+      id:edited.id, date:edited.date, prayer:edited.prayer||'Fajr',
+      startSurahN:edited.sN, startSurahName:edited.sName, fromAyah:edited.fa,
+      endSurahN:edited.eN||edited.sN, endSurahName:edited.eName||edited.sName,
+      toAyah:edited.ta, startPage:edited.sp, endPage:edited.ep,
+      pages:edited.pages, notes:edited.notes||''});
+  }
   renderHistory();
 }
 function deleteLogEntry(){
@@ -1550,22 +1567,136 @@ function deleteLogEntry(){
   const oldPages=p.logs[idx].pages;
   p.totalPg=Math.max(p.startPg||0,(p.totalPg||0)-oldPages);
   p.logs.splice(idx,1);
+  const deletedId = editLogId;
   save();
   closeModal('editLogModal');
   toast('✓ Entry deleted.');
+  // Sync delete to GSheet
+  const gsUrlD = localStorage.getItem('tq2_gs');
+  if(gsUrlD) postToSheet({action:'delete', profile:p.name, id:deletedId});
   renderHistory();
 }
 
-// GSHEET
-function connectGs(){
-  const url=document.getElementById('gsUrl').value.trim();
-  if(!url){alert('Please enter a URL.');return;}
-  localStorage.setItem('tq2_gs',url);
-  document.getElementById('gsDot').style.background='var(--grn)';document.getElementById('gsTxt').style.color='var(--grn)';document.getElementById('gsTxt').textContent='Connected';
-  toast('✓ Google Sheets connected!');
+// ═══════════════════════════════════════════════
+// GSHEET SYNC — real POST implementation
+// ═══════════════════════════════════════════════
+
+async function postToSheet(payload) {
+  const url = localStorage.getItem('tq2_gs');
+  if (!url) return null;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      // text/plain avoids CORS preflight; Apps Script accepts it
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    console.warn('GSheet sync failed:', err);
+    return null;
+  }
 }
-function syncNow(){toast('↑ Syncing to Google Sheets…');}
-function openGs(){const url=localStorage.getItem('tq2_gs');if(url)window.open(url,'_blank');else alert('No sheet connected yet.');}
+
+// Map a log entry (localStorage format) to the payload the script expects
+function entryPayload(entry, profileName) {
+  return {
+    action: 'log',
+    profile: profileName,
+    id: entry.id,
+    date: entry.date,
+    prayer: entry.prayer || 'Fajr',
+    // new field names the Apps Script uses
+    startSurahN:    entry.sN,
+    startSurahName: entry.sName,
+    fromAyah:       entry.fa,
+    endSurahN:      entry.eN   || entry.sN,
+    endSurahName:   entry.eName || entry.sName,
+    toAyah:         entry.ta,
+    startPage:      entry.sp,
+    endPage:        entry.ep,
+    pages:          entry.pages,
+    notes:          entry.notes || ''
+  };
+}
+
+async function syncAllToSheet() {
+  const p = getP(); if (!p) return;
+  const url = localStorage.getItem('tq2_gs'); if (!url) return;
+  updateSyncStatus('syncing');
+  const res = await postToSheet({
+    action: 'sync',
+    profile: p.name,
+    logs: p.logs.map(l => ({
+      id: l.id, date: l.date, prayer: l.prayer || 'Fajr',
+      startSurahN: l.sN, startSurahName: l.sName, fromAyah: l.fa,
+      endSurahN: l.eN || l.sN, endSurahName: l.eName || l.sName, toAyah: l.ta,
+      startPage: l.sp, endPage: l.ep, pages: l.pages, notes: l.notes || ''
+    }))
+  });
+  if (res && res.status === 'ok') {
+    const ts = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem('tq2_gs_lastsync', ts);
+    updateSyncStatus('connected');
+    toast(`✓ Synced ${p.logs.length} sessions to Google Sheets`);
+  } else {
+    updateSyncStatus('error');
+    toast('⚠️ Sync failed — check your Apps Script URL');
+  }
+}
+
+function updateSyncStatus(state) {
+  const dot = document.getElementById('gsDot');
+  const txt = document.getElementById('gsTxt');
+  const hDot = document.getElementById('hGsDot');
+  const hSub = document.getElementById('hGsSub');
+  if (state === 'connected') {
+    const ts = localStorage.getItem('tq2_gs_lastsync') || 'just now';
+    if (dot) { dot.style.background = 'var(--grn)'; }
+    if (txt) { txt.style.color = 'var(--grn)'; txt.textContent = 'Connected'; }
+    if (hDot) hDot.style.background = 'var(--grn)';
+    if (hSub) hSub.textContent = `Connected · last sync ${ts}`;
+  } else if (state === 'syncing') {
+    if (dot) { dot.style.background = 'var(--gold)'; }
+    if (txt) { txt.style.color = 'var(--gold)'; txt.textContent = 'Syncing…'; }
+  } else if (state === 'error') {
+    if (dot) { dot.style.background = '#e84040'; }
+    if (txt) { txt.style.color = '#e84040'; txt.textContent = 'Sync failed'; }
+  } else {
+    if (dot) { dot.style.background = 'var(--muted)'; }
+    if (txt) { txt.style.color = 'var(--muted)'; txt.textContent = 'Not connected'; }
+  }
+}
+
+async function connectGs() {
+  const url = document.getElementById('gsUrl').value.trim();
+  if (!url) { alert('Please enter a URL.'); return; }
+  if (!url.includes('script.google.com')) {
+    alert('Please paste the Apps Script Web App URL (not the Google Sheet URL).
+
+It should look like:
+https://script.google.com/macros/s/.../exec');
+    return;
+  }
+  localStorage.setItem('tq2_gs', url);
+  updateSyncStatus('connected');
+  toast('✓ Connected! Syncing all sessions now…');
+  // Full sync on connect
+  await syncAllToSheet();
+}
+
+async function syncNow() {
+  const url = localStorage.getItem('tq2_gs');
+  if (!url) { toast('⚠️ No Google Sheet connected yet.'); return; }
+  await syncAllToSheet();
+}
+
+function openGs() {
+  const url = localStorage.getItem('tq2_gs');
+  if (url) window.open(url, '_blank');
+  else alert('No sheet connected yet.');
+}
 
 // Close dropdown on outside tap
 document.addEventListener('click',e=>{if(!e.target.closest('.ss-wrap'))document.getElementById('ssDd').classList.remove('open');if(!e.target.closest('#ssInputEnd')&&!e.target.closest('#ssDdEnd'))document.getElementById('ssDdEnd').classList.remove('open');if(!e.target.closest('#setupSurahInput')&&!e.target.closest('#setupSsDd'))document.getElementById('setupSsDd').classList.remove('open');if(!e.target.closest('#editSurahInput')&&!e.target.closest('#editSsDd'))document.getElementById('editSsDd').classList.remove('open');});
