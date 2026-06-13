@@ -127,3 +127,7 @@ Tempel juga URL Google Sheet di kolom "Google Sheet URL" → klik **Save** (untu
 ---
 
 *Semoga Allah menerima tilawah kita. آمين*
+
+---
+
+*Dibuat dengan bantuan [Claude Sonnet 4.6](https://claude.ai) — Anthropic*
