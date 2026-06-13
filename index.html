@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#e8507a">
+<title>Tilawah Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#e8507a;--pk2:#f07a98;--pk-pale:#fde8ef;--pk-bg:#fff5f8;
+  --grn:#3aaa7e;--grn-pale:#e6f7f1;
+  --gold:#f0a500;--gold-pale:#fff8e6;
+  --purp:#7c5cbf;--purp-pale:#f0ecfa;
+  --ink:#1e1428;--muted:#9b8eaa;
+  --border:#f0e8f4;--cream:#fdfaff;--white:#fff;
+  --sh:0 2px 10px rgba(200,150,200,.12);
+  --sh2:0 4px 20px rgba(180,120,180,.15);
+  --r:14px;--rs:10px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'Nunito',sans-serif;background:#f0e6f8;display:flex;justify-content:center;align-items:flex-start;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 0%,rgba(232,80,122,.09) 0%,transparent 55%),radial-gradient(ellipse at 85% 100%,rgba(124,92,191,.08) 0%,transparent 55%);pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;width:100%;max-width:430px;min-height:100vh;min-height:100dvh;background:var(--cream);display:flex;flex-direction:column;box-shadow:0 0 40px rgba(160,100,180,.2);}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(68px + var(--safe-bottom));}
+.screen.active{display:flex;}
+.setup-screen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:32px 20px 40px;text-align:center;min-height:100dvh;overflow-y:auto;}
+.setup-screen.active{display:flex;}
+
+/* SETUP */
+.setup-moon{font-size:48px;margin-bottom:10px;line-height:1;}
+.setup-title{font-size:26px;font-weight:900;color:var(--ink);margin-bottom:3px;}
+.setup-ar{font-family:'Amiri',serif;font-size:24px;color:var(--pink);margin-bottom:6px;direction:rtl;}
+.setup-desc{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6;max-width:280px;}
+.setup-card{background:var(--white);border-radius:var(--r);padding:18px;width:100%;box-shadow:var(--sh2);border:1px solid var(--border);text-align:left;margin-bottom:12px;}
+.sc-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;}
+.lbl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.inp{width:100%;border:2px solid var(--border);border-radius:var(--rs);padding:12px 14px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:600;color:var(--ink);background:var(--cream);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.inp:focus{border-color:var(--pink);}
+.mb12{margin-bottom:12px;}
+.btn{width:100%;background:linear-gradient(135deg,var(--pink),var(--pk2));color:var(--white);border:none;border-radius:var(--rs);padding:14px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(232,80,122,.3);transition:opacity .15s;-webkit-appearance:none;}
+.btn:active{opacity:.85;}
+.p-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--pk-bg);border:2px solid transparent;border-radius:var(--rs);cursor:pointer;margin-bottom:8px;transition:border-color .15s;}
+.p-item:active,.p-item.sel{border-color:var(--pink);}
+.p-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--pk2));color:var(--white);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.p-name{font-size:14px;font-weight:700;color:var(--ink);}
+.p-stat{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,var(--pink) 0%,#c94070 100%);padding:max(16px,env(safe-area-inset-top,0px)) 18px 18px;color:var(--white);position:relative;overflow:hidden;flex-shrink:0;}
+.topbar::after{content:'بِسْمِ اللَّهِ';position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:'Amiri',serif;font-size:30px;opacity:.1;direction:rtl;pointer-events:none;}
+.tp-row{display:flex;justify-content:space-between;align-items:center;}
+.tp-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);border-radius:20px;padding:4px 10px 4px 4px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.tp-av{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+.tp-name{font-size:12px;font-weight:700;}
+.tp-app{font-size:22px;font-weight:900;margin-top:12px;letter-spacing:-.3px;}
+.tp-sub{font-size:11px;opacity:.75;margin-top:1px;font-weight:600;}
+
+/* CARDS */
+.pad{padding:0 14px;}
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--sh);}
+.mt12{margin-top:12px;}
+.mt14{margin-top:14px;}
+.mt16{margin-top:16px;}
+
+/* PROGRESS */
+.prog-card{padding:16px 16px 13px;}
+.prog-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px;}
+.prog-ttl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.prog-pct{font-size:11px;font-weight:700;background:var(--pk-pale);color:var(--pink);border-radius:20px;padding:2px 8px;}
+.prog-main{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:11px;}
+.prog-pg{font-size:32px;font-weight:900;color:var(--ink);line-height:1;}
+.prog-pg span{font-size:13px;font-weight:600;color:var(--muted);margin-left:2px;}
+.eta{text-align:right;}
+.eta-lbl{font-size:10px;color:var(--muted);font-weight:600;}
+.eta-val{font-size:17px;font-weight:800;color:var(--grn);margin-top:1px;}
+.eta-sub{font-size:10px;color:var(--muted);}
+.prog-track{background:var(--pk-pale);border-radius:6px;height:8px;overflow:hidden;margin-bottom:6px;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--pink),var(--pk2));border-radius:6px;transition:width .7s ease;}
+.prog-sub{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-weight:600;}
+
+/* LAST SESSION */
+.last-card{padding:14px 16px 52px;background:linear-gradient(135deg,#7c5cbf 0%,#9b7dd4 100%);color:var(--white);position:relative;overflow:hidden;}
+.last-card::before{content:'';position:absolute;right:-8px;top:-8px;width:70px;height:70px;border:2px solid rgba(255,255,255,.1);border-radius:50%;}
+.last-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.7;margin-bottom:6px;}
+.last-surah{font-size:19px;font-weight:800;line-height:1.2;}
+.last-detail{font-size:11px;opacity:.72;margin-top:4px;font-weight:600;line-height:1.5;padding-right:8px;}
+.log-btn{position:absolute;right:14px;bottom:12px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.3);color:var(--white);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;}
+.log-btn:active{background:rgba(255,255,255,.35);}
+
+/* STATS GRID */
+.stats-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.stat-t{padding:13px 8px;text-align:center;}
+.st-v{font-size:21px;font-weight:900;color:var(--ink);line-height:1;}
+.st-l{font-size:10px;font-weight:600;color:var(--muted);margin-top:4px;line-height:1.3;}
+.grn-v .st-v{color:var(--grn);}
+.gold-v .st-v{color:var(--gold);}
+
+/* SECTION HEADER */
+.sec-row{display:flex;justify-content:space-between;align-items:center;padding:14px 14px 8px;}
+.sec-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.sec-link{font-size:12px;font-weight:700;color:var(--pink);cursor:pointer;}
+
+/* JUZ GRID */
+.juz-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:0 14px;}
+.jc{aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;transition:transform .12s;-webkit-tap-highlight-color:transparent;}
+.jc:active{transform:scale(.93);}
+.jd{background:var(--grn);color:var(--white);}
+.jcur{background:var(--pink);color:var(--white);box-shadow:0 0 0 2px var(--white),0 0 0 4px var(--pink);}
+.jp{background:var(--gold-pale);color:var(--gold);border:2px solid var(--gold);}
+.je{background:var(--pk-pale);color:var(--muted);border:1px solid var(--border);}
+
+/* TREND */
+.trend-card{padding:13px 15px;}
+.trend-hdr{display:flex;justify-content:space-between;margin-bottom:9px;align-items:center;}
+.trend-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.trend-avg{font-size:12px;font-weight:700;color:var(--pink);}
+.bars{display:flex;align-items:flex-end;gap:4px;height:46px;}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.br{width:100%;border-radius:3px 3px 0 0;background:var(--pk-pale);min-height:3px;}
+.br.hi{background:var(--pk2);}
+.br.td{background:var(--grn);}
+.bd{font-size:8px;font-weight:700;color:var(--muted);}
+
+/* GSHEET BANNER */
+.gs-banner{padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;margin:0 0 16px;}
+.gs-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.gs-ttl{font-size:13px;font-weight:700;color:var(--ink);}
+.gs-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.gs-chev{color:var(--muted);font-size:16px;margin-left:auto;}
+
+/* LOG SCREEN */
+.log-hdr{background:linear-gradient(135deg,var(--pink),var(--pk2));padding:max(14px,env(safe-area-inset-top,0px)) 18px 16px;color:var(--white);flex-shrink:0;}
+.lh-top{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.78;margin-bottom:3px;}
+.lh-ttl{font-size:20px;font-weight:900;}
+.lh-sub{font-size:11px;opacity:.72;margin-top:2px;font-weight:600;}
+.log-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.fc{padding:15px;}
+.fsec{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
+.fl{margin-bottom:11px;}
+.fl:last-child{margin-bottom:0;}
+.fl-lbl{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.fi{width:100%;border:2px solid var(--border);border-radius:var(--rs);padding:11px 12px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;color:var(--ink);background:var(--cream);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.fi:focus{border-color:var(--pink);}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.fl-sub{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px;}
+
+/* SURAH SEARCH */
+.ss-wrap{position:relative;}
+.ss-dd{position:absolute;left:0;right:0;background:var(--white);border:2px solid var(--pink);border-top:none;border-radius:0 0 var(--rs) var(--rs);max-height:190px;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:60;display:none;box-shadow:var(--sh2);}
+.ss-dd.open{display:block;}
+.ss-opt{padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.ss-opt:active{background:var(--pk-pale);}
+.ss-opt:last-child{border-bottom:none;}
+.ss-opt-ar{font-family:'Amiri',serif;font-size:15px;color:var(--ink);direction:rtl;}
+.ss-opt-info{font-size:10px;color:var(--muted);}
+
+.sel-badge{display:none;margin-top:8px;padding:10px 12px;background:var(--purp-pale);border-radius:var(--rs);border:2px solid var(--purp);}
+.sb-lbl{font-size:10px;font-weight:700;color:var(--purp);letter-spacing:.7px;text-transform:uppercase;margin-bottom:3px;}
+.sb-row{display:flex;justify-content:space-between;align-items:center;}
+.sb-name{font-size:14px;font-weight:800;color:var(--ink);}
+.sb-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+.sb-ar{font-family:'Amiri',serif;font-size:19px;color:var(--purp);direction:rtl;}
+
+/* CALC BADGE */
+.calc-b{background:var(--grn-pale);border:2px solid var(--grn);border-radius:var(--rs);padding:12px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.cb-lbl{font-size:12px;font-weight:700;color:var(--grn);}
+.cb-sub{font-size:10px;color:var(--grn);opacity:.75;margin-top:2px;}
+.cb-val{font-size:28px;font-weight:900;color:var(--grn);}
+
+.save-btn{width:100%;background:linear-gradient(135deg,var(--grn),#2d9368);color:var(--white);border:none;border-radius:var(--rs);padding:15px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(58,170,126,.3);-webkit-appearance:none;}
+.save-btn:active{opacity:.88;}
+
+/* HISTORY */
+.hist-hdr{padding:16px 14px 10px;}
+.hist-title{font-size:18px;font-weight:900;color:var(--ink);}
+.log-entries{display:flex;flex-direction:column;gap:9px;padding:0 14px 4px;}
+.lc{padding:12px 13px;display:flex;gap:11px;align-items:flex-start;cursor:pointer;}
+.lc:active{background:var(--pk-bg);}
+.lc-dot{width:30px;height:30px;border-radius:50%;background:var(--pk-pale);color:var(--pink);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.lc-main{flex:1;min-width:0;}
+.lc-date{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:2px;}
+.lc-surah{font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lc-detail{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;}
+.lc-pg{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;}
+.lc-pv{font-size:21px;font-weight:900;color:var(--pink);line-height:1;}
+.lc-pl{font-size:10px;font-weight:700;color:var(--muted);}
+
+/* STATS SCREEN */
+.stats-body{padding:14px;display:flex;flex-direction:column;gap:12px;}
+.stats-big{background:linear-gradient(135deg,var(--pink) 0%,#c94070 100%);border-radius:var(--r);padding:18px;color:var(--white);}
+.sbi-ttl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.78;margin-bottom:13px;}
+.sbi-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.sbi-v{font-size:27px;font-weight:900;}
+.sbi-l{font-size:11px;opacity:.72;font-weight:600;margin-top:1px;}
+.streak-row{display:flex;align-items:center;gap:12px;padding:14px;}
+.streak-flame{font-size:34px;}
+.streak-v{font-size:26px;font-weight:900;color:var(--gold);}
+.streak-l{font-size:11px;font-weight:600;color:var(--muted);}
+.pace-card{padding:15px;}
+.pace-ttl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:11px;}
+.pace-row{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;border-radius:var(--rs);background:var(--cream);border:1px solid var(--border);margin-bottom:8px;}
+.pace-row:last-child{margin-bottom:0;}
+.pace-name{font-size:13px;font-weight:700;color:var(--ink);}
+.pace-desc{font-size:10px;color:var(--muted);margin-top:1px;}
+.pace-date{font-size:13px;font-weight:800;color:var(--pink);}
+.gss-card{padding:15px;}
+.gss-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.gss-title{font-size:14px;font-weight:800;color:var(--ink);}
+.gss-st{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);}
+.gss-sdot{width:7px;height:7px;border-radius:50%;background:var(--muted);}
+.gss-desc{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px;line-height:1.5;}
+.gs-url-row{display:flex;gap:8px;margin-bottom:10px;}
+.gs-url-inp{flex:1;border:2px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;color:var(--ink);background:var(--cream);outline:none;-webkit-appearance:none;}
+.gs-url-inp:focus{border-color:var(--pink);}
+.gs-con{background:var(--pink);color:var(--white);border:none;border-radius:var(--rs);padding:10px 13px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;-webkit-appearance:none;}
+.gs-acts{display:flex;gap:8px;}
+.ga{flex:1;padding:9px;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center;-webkit-appearance:none;}
+.ga-s{background:var(--grn-pale);color:var(--grn);border:2px solid var(--grn);}
+.ga-o{background:var(--pk-pale);color:var(--pink);border:2px solid var(--pink);}
+.gs-note{margin-top:10px;padding:9px;background:var(--pk-pale);border-radius:var(--rs);font-size:11px;color:var(--pink);font-weight:700;line-height:1.5;}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--white);border-top:1px solid var(--border);display:flex;padding:6px 0 calc(8px + var(--safe-bottom));z-index:90;box-shadow:0 -3px 14px rgba(200,150,200,.1);}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;-webkit-tap-highlight-color:transparent;transition:transform .12s;}
+.nb:active{transform:scale(.9);}
+.ni{font-size:20px;line-height:1;}
+.nl{font-size:10px;font-weight:700;color:var(--muted);}
+.nb.active .nl{color:var(--pink);}
+.nb.active .ni-w{background:var(--pk-pale);border-radius:9px;padding:2px 10px;}
+
+/* TOAST */
+.toast{position:fixed;top:max(16px,env(safe-area-inset-top,16px));left:50%;transform:translateX(-50%) translateY(-80px);background:var(--grn);color:var(--white);padding:10px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:200;transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 4px 16px rgba(58,170,126,.35);white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* JUZ COMPLETED BADGE */
+.juz-badge{display:none;margin-top:10px;padding:10px 12px;background:var(--grn-pale);border:2px solid var(--grn);border-radius:var(--rs);font-size:12px;font-weight:700;color:var(--grn);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-weight:600;font-size:14px;line-height:1.7;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.prog-card{animation:fadeUp .3s ease .04s both;}
+.last-card{animation:fadeUp .3s ease .08s both;}
+.stats-3{animation:fadeUp .3s ease .12s both;}
+.juz-grid{animation:fadeUp .3s ease .16s both;}
+.trend-card{animation:fadeUp .3s ease .19s both;}
+.gs-banner{animation:fadeUp .3s ease .22s both;}
+
+/* KHATAM BANNER on home */
+.khatam-banner{margin:12px 0 0;background:linear-gradient(135deg,#f0a500,#f5c842);border-radius:var(--r);padding:16px 18px;color:var(--ink);position:relative;overflow:hidden;}
+.khatam-banner::before{content:'🏆';position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:44px;opacity:.2;}
+.kb-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:.7;margin-bottom:4px;}
+.kb-title{font-size:20px;font-weight:900;}
+.kb-sub{font-size:12px;opacity:.75;margin-top:3px;font-weight:600;}
+.kb-btn{margin-top:12px;background:rgba(0,0,0,.15);border:1.5px solid rgba(0,0,0,.2);color:var(--ink);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;display:inline-block;}
+.kb-btn:active{background:rgba(0,0,0,.25);}
+
+/* KHATAM MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(30,20,40,.55);z-index:150;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{width:100%;max-width:430px;background:var(--cream);border-radius:24px 24px 0 0;padding:24px 20px calc(28px + var(--safe-bottom));transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal-icon{font-size:48px;text-align:center;margin-bottom:12px;}
+.modal-title{font-size:22px;font-weight:900;color:var(--ink);text-align:center;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:20px;font-weight:600;}
+.modal-khatam-count{background:var(--gold-pale);border:2px solid var(--gold);border-radius:var(--rs);padding:14px;text-align:center;margin-bottom:20px;}
+.mkc-num{font-size:40px;font-weight:900;color:var(--gold);line-height:1;}
+.mkc-lbl{font-size:12px;font-weight:700;color:var(--gold);opacity:.8;margin-top:4px;}
+.modal-btn-row{display:flex;gap:10px;}
+.modal-btn{flex:1;padding:13px;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;text-align:center;border:none;-webkit-appearance:none;}
+.modal-btn-primary{background:linear-gradient(135deg,var(--pink),var(--pk2));color:var(--white);box-shadow:0 4px 14px rgba(232,80,122,.3);}
+.modal-btn-secondary{background:var(--pk-pale);color:var(--pink);border:2px solid var(--pink-pale);}
+
+/* CONFIRM MODAL (clear history) */
+.confirm-modal-title{font-size:18px;font-weight:900;color:var(--ink);text-align:center;margin-bottom:8px;}
+.confirm-modal-sub{font-size:13px;color:var(--muted);text-align:center;line-height:1.6;margin-bottom:20px;font-weight:600;}
+.modal-btn-danger{background:linear-gradient(135deg,#e84040,#f06060);color:var(--white);box-shadow:0 4px 14px rgba(232,64,64,.3);}
+
+/* KHATAM COUNT on stats */
+.khatam-count-card{padding:15px;display:flex;align-items:center;gap:14px;}
+.kc-trophies{font-size:32px;}
+.kc-val{font-size:28px;font-weight:900;color:var(--gold);}
+.kc-lbl{font-size:11px;font-weight:600;color:var(--muted);}
+.kc-history{flex:1;}
+.kc-entry{font-size:11px;font-weight:600;color:var(--muted);margin-top:2px;}
+
+/* CLEAR BTN */
+.clear-btn{width:100%;padding:12px;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:center;background:transparent;border:2px solid #e84040;color:#e84040;-webkit-appearance:none;}
+.clear-btn:active{background:rgba(232,64,64,.08);}
+
+/* PRAYER TIME CHIPS */
+.prayer-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;}
+.pchip{padding:6px 11px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid var(--border);color:var(--muted);cursor:pointer;background:var(--cream);transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.pchip:active{transform:scale(.94);}
+.pchip.active{background:var(--pink);border-color:var(--pink);color:var(--white);}
+
+/* EDIT LOG MODAL */
+.edit-modal-title{font-size:18px;font-weight:900;color:var(--ink);margin-bottom:2px;}
+.edit-modal-sub{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:16px;}
+.edit-field{margin-bottom:12px;}
+.edit-field:last-of-type{margin-bottom:0;}
+.ef-lbl{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.ef-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.edit-delete-row{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+
+/* LOG CARD edit button */
+.lc-edit{background:var(--pk-pale);border:1.5px solid var(--pk2);color:var(--pink);border-radius:7px;padding:4px 9px;font-size:11px;font-weight:700;font-family:Nunito,sans-serif;cursor:pointer;margin-top:6px;display:inline-block;}
+.lc-edit:active{background:var(--pk-pale);opacity:.7;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<div class="toast" id="toast"></div>
+
+<!-- SETUP SCREEN -->
+<div class="setup-screen active" id="setupScreen">
+  <div class="setup-moon">🌙</div>
+  <div class="setup-title">Tilawah Tracker</div>
+  <div class="setup-ar">تِلَاوَة</div>
+  <div class="setup-desc">Track your daily Quran reading from cover to cover — Fajr by Fajr</div>
+  <div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:16px;letter-spacing:.5px;" id="versionDisplay">v1.4.1 · 2026-06-13</div>
+  <div id="existingCard" style="display:none;width:100%;margin-bottom:12px;">
+    <div class="setup-card">
+      <div class="sc-title">Select Profile</div>
+      <div id="profileList"></div>
+    </div>
+  </div>
+  <div class="setup-card" style="width:100%;">
+    <div class="sc-title">New Profile</div>
+    <div class="lbl">Name</div>
+    <input class="inp mb12" id="profileNameInput" placeholder="e.g. Ivan, Kinan…" maxlength="30" type="text">
+    <div class="lbl" style="margin-top:2px;">Where are you currently? <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted);font-size:11px;">(set if already reading)</span></div>
+    <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:8px;line-height:1.5;">This sets your starting position so Juz 1–N all show as completed correctly.</div>
+    <div style="position:relative;margin-bottom:8px;">
+      <input class="inp" id="setupSurahInput" placeholder="Surah: e.g. Al-Hajj, 22… (or leave blank = start)" oninput="filterSetupSurahs()" autocomplete="off" type="search">
+      <div class="ss-dd" id="setupSsDd" style="z-index:70;"></div>
+    </div>
+    <div id="setupSelBadge" style="display:none;padding:9px 12px;background:var(--purp-pale);border-radius:var(--rs);border:2px solid var(--purp);margin-bottom:8px;">
+      <div style="font-size:10px;font-weight:700;color:var(--purp);text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px;">Starting surah</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:14px;font-weight:800;color:var(--ink);" id="setupSelName">—</div><div style="font-size:11px;color:var(--muted);margin-top:1px;" id="setupSelMeta">—</div></div>
+        <div style="font-family:Amiri,serif;font-size:18px;color:var(--purp);direction:rtl;" id="setupSelAr">—</div>
+      </div>
+    </div>
+    <div id="setupAyahRow" style="display:none;margin-bottom:8px;">
+      <div class="lbl">Starting from Ayah</div>
+      <input class="inp" id="setupAyahInput" type="number" placeholder="e.g. 56" min="1" inputmode="numeric" value="1" oninput="updateSetupPreview()">
+    </div>
+    <div id="setupPagePreview" style="display:none;padding:8px 12px;background:var(--grn-pale);border:2px solid var(--grn);border-radius:var(--rs);font-size:12px;font-weight:700;color:var(--grn);margin-bottom:12px;line-height:1.6;"></div>
+    <button class="btn" onclick="createProfile()">Start Tracking →</button>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div class="screen" id="homeScreen">
+  <div class="topbar">
+    <div class="tp-row">
+      <div class="tp-pill" onclick="goSetup()">
+        <div class="tp-av" id="tpAv">—</div>
+        <span class="tp-name" id="tpName">—</span>
+      </div>
+    </div>
+    <div class="tp-app">Tilawah</div>
+    <div class="tp-sub" id="tpSub">Fajr reading tracker</div>
+  </div>
+  <div class="pad">
+    <!-- PROGRESS -->
+    <div class="card prog-card mt16">
+      <div class="prog-hdr">
+        <div class="prog-ttl">Khatam Progress</div>
+        <div class="prog-pct" id="hPct">0%</div>
+      </div>
+      <div class="prog-main">
+        <div class="prog-pg" id="hPg">0 <span>/ 604 pages</span></div>
+        <div class="eta">
+          <div class="eta-lbl">Est. Khatam</div>
+          <div class="eta-val" id="hEtaD">—</div>
+          <div class="eta-sub" id="hEtaSub">log more to predict</div>
+        </div>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="hFill" style="width:0%"></div></div>
+      <div class="prog-sub"><span id="hLeft">604 pages left</span><span id="hJuzProg">Juz 0 / 30</span></div>
+    </div>
+    <!-- LAST SESSION -->
+    <div class="card last-card mt12">
+      <div class="last-lbl">Last Session</div>
+      <div class="last-surah" id="hLastSurah">No sessions yet</div>
+      <div class="last-detail" id="hLastDetail">Tap Log Session to begin your khatam</div>
+      <button class="log-btn" onclick="goTab('log')">+ Log Session</button>
+    </div>
+    <!-- STATS -->
+    <div class="stats-3 mt12">
+      <div class="card stat-t"><div class="st-v" id="hAvg">—</div><div class="st-l">avg pages/day</div></div>
+      <div class="card stat-t grn-v"><div class="st-v" id="hDays">0</div><div class="st-l">days logged</div></div>
+      <div class="card stat-t gold-v"><div class="st-v" id="hStreak">0</div><div class="st-l">day streak 🔥</div></div>
+    </div>
+  </div>
+  <!-- KHATAM BANNER (shown only when khatam reached) -->
+  <div id="khatamBanner" style="display:none;padding:0 14px;"></div>
+  <!-- JUZ GRID -->
+  <div class="sec-row"><div class="sec-lbl">Juz Progress (30 Juz)</div><div class="sec-link" onclick="goTab('stats')">detail →</div></div>
+  <div class="juz-grid" id="hJuzGrid"></div>
+  <!-- TREND -->
+  <div class="sec-row" style="margin-top:14px;padding-bottom:0;"><div class="sec-lbl">Pages · Last 14 Days</div><span class="trend-avg" id="hTrendAvg" style="font-size:12px;font-weight:700;color:var(--pink);margin-right:14px;">—</span></div>
+  <div class="pad mt12"><div class="card trend-card">
+    <div class="bars" id="hBars"></div>
+  </div></div>
+  <!-- GSHEET -->
+  <div class="pad"><div class="card gs-banner mt12" onclick="goTab('stats')">
+    <div class="gs-dot" id="hGsDot" style="background:var(--muted);"></div>
+    <div><div class="gs-ttl">Google Sheets Sync</div><div class="gs-sub" id="hGsSub">Not connected · tap Stats to configure</div></div>
+    <div class="gs-chev">›</div>
+  </div></div>
+</div>
+
+<!-- LOG SCREEN -->
+<div class="screen" id="logScreen">
+  <div class="log-hdr">
+    <div class="lh-top" id="logDate">Today</div>
+    <div class="lh-ttl">Log Session</div>
+    <div class="lh-sub" id="logProf">Profile: —</div>
+  </div>
+  <div class="log-body">
+
+    <!-- WHEN: Prayer time + Date -->
+    <div class="card fc">
+      <div class="fsec">When</div>
+      <div class="fl">
+        <div class="fl-lbl">Prayer Time</div>
+        <div class="prayer-chips" id="prayerChips">
+          <div class="pchip active" onclick="selectPrayer(this,'Fajr')">🌅 Fajr</div>
+          <div class="pchip" onclick="selectPrayer(this,'Dzuhur')">☀️ Dzuhur</div>
+          <div class="pchip" onclick="selectPrayer(this,'Asr')">🌤 Asr</div>
+          <div class="pchip" onclick="selectPrayer(this,'Maghrib')">🌇 Maghrib</div>
+          <div class="pchip" onclick="selectPrayer(this,'Isya')">🌙 Isya</div>
+          <div class="pchip" onclick="selectPrayer(this,'Other')">📖 Other</div>
+        </div>
+      </div>
+      <div class="fl" style="margin-bottom:0;">
+        <div class="fl-lbl">Date</div>
+        <input class="fi" type="date" id="logDate2" style="width:100%;">
+        <div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:5px;">Change for retrospective log</div>
+      </div>
+    </div>
+
+    <!-- START POSITION -->
+    <div class="card fc">
+      <div class="fsec">Start Reading</div>
+      <div class="fl">
+        <div class="fl-lbl">Starting Surah</div>
+        <div class="ss-wrap">
+          <input class="fi" id="ssInput" placeholder="e.g. Al-Hajj, 22, Baqarah…" oninput="filterSurahs()" autocomplete="off" type="search">
+          <div class="ss-dd" id="ssDd"></div>
+        </div>
+        <div class="sel-badge" id="selBadge">
+          <div class="sb-lbl">Start Surah</div>
+          <div class="sb-row">
+            <div><div class="sb-name" id="sbName">—</div><div class="sb-meta" id="sbMeta">—</div></div>
+            <div class="sb-ar" id="sbAr">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="fl" style="margin-bottom:0;">
+        <div class="fl-lbl">From Ayah</div>
+        <input class="fi" type="number" id="fromAyah" placeholder="e.g. 1" min="1" inputmode="numeric" oninput="recalc()">
+      </div>
+    </div>
+
+    <!-- END POSITION -->
+    <div class="card fc">
+      <div class="fsec">End Reading</div>
+      <div class="fl">
+        <div class="fl-lbl">Ending Surah <span style="font-size:10px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;">(leave blank = same as start)</span></div>
+        <div class="ss-wrap">
+          <input class="fi" id="ssInputEnd" placeholder="Same surah, or search different…" oninput="filterSurahsEnd()" autocomplete="off" type="search">
+          <div class="ss-dd" id="ssDdEnd"></div>
+        </div>
+        <div class="sel-badge" id="selBadgeEnd" style="border-color:var(--grn);background:var(--grn-pale);">
+          <div class="sb-lbl" style="color:var(--grn);">End Surah</div>
+          <div class="sb-row">
+            <div><div class="sb-name" id="sbNameEnd">—</div><div class="sb-meta" id="sbMetaEnd">—</div></div>
+            <div class="sb-ar" id="sbArEnd">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="fl" style="margin-bottom:0;">
+        <div class="fl-lbl">To Ayah</div>
+        <input class="fi" type="number" id="toAyah" placeholder="e.g. 78" min="1" inputmode="numeric" oninput="recalc()">
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="card fc">
+      <div class="fsec">Summary</div>
+      <div class="calc-b" style="margin-bottom:10px;">
+        <div><div class="cb-lbl">Pages Read</div><div class="cb-sub" id="cbSub">Fill start &amp; end positions</div></div>
+        <div class="cb-val" id="cbVal">—</div>
+      </div>
+      <div id="spanSummary" style="display:none;padding:9px 12px;background:var(--pk-pale);border-radius:var(--rs);font-size:12px;font-weight:700;color:var(--pink);margin-bottom:10px;line-height:1.6;"></div>
+      <div class="fl" style="margin-bottom:0;">
+        <div class="fl-lbl">Override pages (optional)</div>
+        <input class="fi" type="number" id="pgOvr" placeholder="Manual override" min="1" inputmode="numeric" oninput="recalc()" style="width:100%;">
+      </div>
+      <div class="juz-badge" id="juzBadge" style="margin-top:10px;">&#10003; This completes a Juz!</div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="card fc">
+      <div class="fsec">Notes (optional)</div>
+      <input class="fi" type="text" id="logNotes" placeholder="e.g. with tajweed, slow recitation…" style="width:100%;">
+    </div>
+
+    <button class="save-btn" onclick="saveLog()">&#10003; Save &amp; Update Stats</button>
+  </div>
+</div>
+
+<!-- HISTORY SCREEN -->
+<div class="screen" id="historyScreen">
+  <div class="topbar" style="padding-bottom:14px;">
+    <div class="tp-row" style="justify-content:space-between;">
+      <div class="tp-app" style="margin-top:0;font-size:18px;">Reading History</div>
+      <button onclick="openModal('clearModal')" style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.3);color:white;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;font-family:Nunito,sans-serif;cursor:pointer;">🗑️ Clear</button>
+    </div>
+    <div class="tp-sub" id="histSub">—</div>
+  </div>
+  <div class="log-entries" style="padding-top:14px;" id="logEntries">
+    <div class="empty-state">No sessions yet.<br>Start logging your Fajr tilawah!</div>
+  </div>
+</div>
+
+<!-- STATS SCREEN -->
+<div class="screen" id="statsScreen">
+  <div class="stats-body">
+    <div class="stats-big">
+      <div class="sbi-ttl">Overall Statistics</div>
+      <div class="sbi-grid">
+        <div><div class="sbi-v" id="stPg">0</div><div class="sbi-l">pages read</div></div>
+        <div><div class="sbi-v" id="stLeft">604</div><div class="sbi-l">pages left</div></div>
+        <div><div class="sbi-v" id="stAvg">—</div><div class="sbi-l">avg pg/day</div></div>
+        <div><div class="sbi-v" id="stSess">0</div><div class="sbi-l">total sessions</div></div>
+      </div>
+    </div>
+    <div class="card streak-row">
+      <div class="streak-flame">🔥</div>
+      <div><div class="streak-v" id="stStreak">0 days</div><div class="streak-l">current reading streak</div></div>
+    </div>
+    <div class="card pace-card">
+      <div class="pace-ttl">Khatam Predictions</div>
+      <div id="paceRows"><div class="empty-state" style="padding:12px;">Log sessions to see predictions</div></div>
+    </div>
+    <div class="card khatam-count-card" id="khatamCountCard">
+      <div class="kc-trophies">🏆</div>
+      <div class="kc-history">
+        <div class="kc-val" id="kcVal">0</div>
+        <div class="kc-lbl">Quran khatam completed</div>
+        <div id="kcHistory"></div>
+      </div>
+    </div>
+    <button class="clear-btn" onclick="openModal('clearModal')">🗑️ Clear Reading Log</button>
+    <div class="card gss-card">
+      <div class="gss-hdr">
+        <div class="gss-title">Google Sheets Sync</div>
+        <div class="gss-st"><div class="gss-sdot" id="gsDot"></div><span id="gsTxt">Not connected</span></div>
+      </div>
+      <div class="gss-desc">Connect your Google Sheet to auto-sync every session.</div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Apps Script Web App URL</div>
+      <div class="gs-url-row">
+        <input class="gs-url-inp" id="gsUrl" placeholder="https://script.google.com/macros/s/…/exec" type="url">
+        <button class="gs-con" onclick="connectGs()">Connect</button>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;margin-top:10px;">Google Sheet URL</div>
+      <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px;">Paste your sheet URL here so the Open Sheet button opens the spreadsheet directly.</div>
+      <div class="gs-url-row">
+        <input class="gs-url-inp" id="gsSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…" type="url">
+        <button class="gs-con" onclick="saveSheetUrl()" style="background:var(--purp);">Save</button>
+      </div>
+      <div class="gs-acts">
+        <button class="ga ga-s" onclick="syncNow()">↑ Sync Now</button>
+        <button class="ga ga-o" onclick="openGs()">Open Sheet ↗</button>
+      </div>
+      <div class="gs-note">📌 Full sync requires a Google Apps Script Web App. The real build will POST session data to your Apps Script URL on each save.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav" id="bnav" style="display:none;">
+  <div class="nb active" id="nav-home" onclick="goTab('home')"><div class="ni-w"><div class="ni">🏠</div></div><div class="nl">Home</div></div>
+  <div class="nb" id="nav-log" onclick="goTab('log')"><div class="ni-w"><div class="ni">✏️</div></div><div class="nl">Log</div></div>
+  <div class="nb" id="nav-history" onclick="goTab('history')"><div class="ni-w"><div class="ni">📋</div></div><div class="nl">History</div></div>
+  <div class="nb" id="nav-stats" onclick="goTab('stats')"><div class="ni-w"><div class="ni">📊</div></div><div class="nl">Stats</div></div>
+</div>
+
+<!-- KHATAM CELEBRATION MODAL -->
+<div class="modal-overlay" id="khatamModal" onclick="handleModalClick(event,'khatamModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-icon">🏆</div>
+    <div class="modal-title">Alhamdulillah!</div>
+    <div class="modal-sub">You have completed a full reading of the Quran.<br>May Allah accept your tilawah.</div>
+    <div class="modal-khatam-count">
+      <div class="mkc-num" id="khatamCountDisplay">1</div>
+      <div class="mkc-lbl">Khatam completed</div>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn modal-btn-secondary" onclick="closeModal('khatamModal')">Close</button>
+      <button class="modal-btn modal-btn-primary" onclick="startNewKhatam()">Start New Khatam →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLEAR HISTORY CONFIRM MODAL -->
+<div class="modal-overlay" id="clearModal" onclick="handleModalClick(event,'clearModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-icon">🗑️</div>
+    <div class="confirm-modal-title">Clear Reading Log?</div>
+    <div class="confirm-modal-sub">This will permanently delete all session history and reset your progress to zero. Your profile and khatam count will be kept.<br><br>This cannot be undone.</div>
+    <div class="modal-btn-row">
+      <button class="modal-btn modal-btn-secondary" onclick="closeModal('clearModal')">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmClear()">Yes, Clear Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE PROFILE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteProfileModal" onclick="handleModalClick(event,'deleteProfileModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-icon">👤</div>
+    <div class="confirm-modal-title" id="deleteProfileTitle">Delete Profile?</div>
+    <div class="confirm-modal-sub">This will permanently delete the profile <strong id="deleteProfileNameDisplay">—</strong> and all its sessions, history, and khatam records.<br><br>This cannot be undone.</div>
+    <div class="modal-btn-row">
+      <button class="modal-btn modal-btn-secondary" onclick="closeModal('deleteProfileModal')">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDeleteProfile()">Yes, Delete Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT LOG MODAL -->
+<div class="modal-overlay" id="editLogModal" onclick="handleModalClick(event,'editLogModal')">
+  <div class="modal" style="max-height:90dvh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="edit-modal-title">Edit Session</div>
+    <div class="edit-modal-sub" id="editLogSubtitle">—</div>
+
+    <div class="edit-field">
+      <div class="ef-lbl">Surah</div>
+      <div style="position:relative;">
+        <input class="fi" id="editSurahInput" placeholder="Search surah…" oninput="filterEditSurahs()" autocomplete="off" type="search" style="width:100%;">
+        <div class="ss-dd" id="editSsDd" style="z-index:80;"></div>
+      </div>
+      <div id="editSelBadge" style="display:none;margin-top:7px;padding:9px 12px;background:var(--purp-pale);border-radius:var(--rs);border:2px solid var(--purp);">
+        <div style="font-size:10px;font-weight:700;color:var(--purp);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px;">Selected</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:14px;font-weight:800;color:var(--ink);" id="editSelName">—</div><div style="font-size:11px;color:var(--muted);margin-top:1px;" id="editSelMeta">—</div></div>
+          <div style="font-family:Amiri,serif;font-size:18px;color:var(--purp);direction:rtl;" id="editSelAr">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-field" style="margin-top:12px;">
+      <div class="ef-lbl">Ayah Range</div>
+      <div class="ef-row">
+        <div><div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px;">From</div><input class="fi" type="number" id="editFromAyah" min="1" inputmode="numeric" oninput="recalcEdit()"></div>
+        <div><div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px;">To</div><input class="fi" type="number" id="editToAyah" min="1" inputmode="numeric" oninput="recalcEdit()"></div>
+      </div>
+    </div>
+
+    <div class="edit-field" style="margin-top:12px;">
+      <div class="ef-lbl">Pages</div>
+      <div class="calc-b" style="margin-bottom:8px;">
+        <div><div class="cb-lbl">Pages Read</div><div class="cb-sub" id="editCalcSub">—</div></div>
+        <div class="cb-val" id="editCalcVal">—</div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;">Override (optional)</div>
+      <input class="fi" type="number" id="editPgOvr" placeholder="Manual page count" min="1" inputmode="numeric" oninput="recalcEdit()" style="width:100%;">
+    </div>
+
+    <div class="edit-field" style="margin-top:12px;">
+      <div class="ef-lbl">Date</div>
+      <input class="fi" type="date" id="editDate" style="width:100%;">
+    </div>
+
+    <div class="edit-field" style="margin-top:12px;">
+      <div class="ef-lbl">Notes</div>
+      <input class="fi" type="text" id="editNotes" placeholder="e.g. with tajweed…" style="width:100%;">
+    </div>
+
+    <div class="modal-btn-row" style="margin-top:16px;">
+      <button class="modal-btn modal-btn-secondary" onclick="closeModal('editLogModal')">Cancel</button>
+      <button class="modal-btn modal-btn-primary" onclick="saveEditLog()">Save Changes</button>
+    </div>
+
+    <div class="edit-delete-row">
+      <button class="clear-btn" onclick="deleteLogEntry()">🗑️ Delete This Entry</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// VERSION
+// ═══════════════════════════════════════════════
+const APP_VERSION = '1.4.2';
+const BUILD_DATE  = '2026-06-13';
+
+// ═══════════════════════════════════════════════
+// JUZ BOUNDARY TABLE
+// Each entry: juz number, start page (standard 604-page Uthmani mushaf)
+// Source: standard Medina mushaf page boundaries
+// ═══════════════════════════════════════════════
+const JUZ_PAGES = [
+  {juz:1,  startPg:1},
+  {juz:2,  startPg:22},
+  {juz:3,  startPg:42},
+  {juz:4,  startPg:62},
+  {juz:5,  startPg:82},
+  {juz:6,  startPg:102},
+  {juz:7,  startPg:121},
+  {juz:8,  startPg:142},
+  {juz:9,  startPg:162},
+  {juz:10, startPg:182},
+  {juz:11, startPg:201},
+  {juz:12, startPg:222},
+  {juz:13, startPg:242},
+  {juz:14, startPg:262},
+  {juz:15, startPg:282},
+  {juz:16, startPg:302},
+  {juz:17, startPg:322},
+  {juz:18, startPg:342},
+  {juz:19, startPg:362},
+  {juz:20, startPg:382},
+  {juz:21, startPg:402},
+  {juz:22, startPg:422},
+  {juz:23, startPg:442},
+  {juz:24, startPg:462},
+  {juz:25, startPg:482},
+  {juz:26, startPg:502},
+  {juz:27, startPg:522},
+  {juz:28, startPg:542},
+  {juz:29, startPg:562},
+  {juz:30, startPg:582},
+];
+// End page of juz N = startPg of juz N+1 - 1; juz 30 ends at 604
+function juzEndPg(j){return j===30?604:JUZ_PAGES[j].startPg-1;}
+function pageToJuz(pg){
+  for(let i=JUZ_PAGES.length-1;i>=0;i--){
+    if(pg>=JUZ_PAGES[i].startPg)return JUZ_PAGES[i].juz;
+  }
+  return 1;
+}
+// How many complete juz finished given total pages read
+// A juz is "done" when reader has reached or passed its end page
+// No break — iterate all 30 so partial progress mid-Quran is counted correctly
+function completedJuz(totalPg){
+  let done=0;
+  for(let j=1;j<=30;j++){
+    if(totalPg>=juzEndPg(j))done=j;
+  }
+  return done;
+}
+// Status of each juz for display
+function juzStatusArr(totalPg){
+  const arr=[];
+  for(let j=1;j<=30;j++){
+    const s=JUZ_PAGES[j-1].startPg,e=juzEndPg(j);
+    if(totalPg>=e) arr.push('done');
+    else if(totalPg>=s) arr.push('cur');
+    else arr.push('empty');
+  }
+  return arr;
+}
+
+// ═══════════════════════════════════════════════
+// SURAH DATA — 114 surahs
+// sp = start page in standard 604-page Uthmani mushaf
+// ═══════════════════════════════════════════════
+const S=[
+{n:1,  name:"Al-Fatihah",     ar:"الْفَاتِحَة",     ayahs:7,   sp:1},
+{n:2,  name:"Al-Baqarah",     ar:"الْبَقَرَة",      ayahs:286, sp:2},
+{n:3,  name:"Ali 'Imran",     ar:"آل عِمْرَان",     ayahs:200, sp:50},
+{n:4,  name:"An-Nisa",        ar:"النِّسَاء",       ayahs:176, sp:77},
+{n:5,  name:"Al-Ma'idah",     ar:"الْمَائِدَة",     ayahs:120, sp:106},
+{n:6,  name:"Al-An'am",       ar:"الْأَنْعَام",     ayahs:165, sp:128},
+{n:7,  name:"Al-A'raf",       ar:"الْأَعْرَاف",     ayahs:206, sp:151},
+{n:8,  name:"Al-Anfal",       ar:"الْأَنْفَال",     ayahs:75,  sp:177},
+{n:9,  name:"At-Tawbah",      ar:"التَّوْبَة",      ayahs:129, sp:187},
+{n:10, name:"Yunus",          ar:"يُونُس",          ayahs:109, sp:208},
+{n:11, name:"Hud",            ar:"هُود",            ayahs:123, sp:221},
+{n:12, name:"Yusuf",          ar:"يُوسُف",          ayahs:111, sp:235},
+{n:13, name:"Ar-Ra'd",        ar:"الرَّعْد",        ayahs:43,  sp:249},
+{n:14, name:"Ibrahim",        ar:"إِبْرَاهِيم",     ayahs:52,  sp:255},
+{n:15, name:"Al-Hijr",        ar:"الْحِجْر",        ayahs:99,  sp:262},
+{n:16, name:"An-Nahl",        ar:"النَّحْل",        ayahs:128, sp:267},
+{n:17, name:"Al-Isra",        ar:"الْإِسْرَاء",     ayahs:111, sp:282},
+{n:18, name:"Al-Kahf",        ar:"الْكَهْف",        ayahs:110, sp:293},
+{n:19, name:"Maryam",         ar:"مَرْيَم",         ayahs:98,  sp:305},
+{n:20, name:"Ta-Ha",          ar:"طه",              ayahs:135, sp:312},
+{n:21, name:"Al-Anbiya",      ar:"الْأَنبِيَاء",    ayahs:112, sp:322},
+{n:22, name:"Al-Hajj",        ar:"الْحَج",          ayahs:78,  sp:333},
+{n:23, name:"Al-Mu'minun",    ar:"الْمُؤْمِنُون",   ayahs:118, sp:342},
+{n:24, name:"An-Nur",         ar:"النُّور",         ayahs:64,  sp:350},
+{n:25, name:"Al-Furqan",      ar:"الْفُرْقَان",     ayahs:77,  sp:359},
+{n:26, name:"Ash-Shu'ara",    ar:"الشُّعَرَاء",     ayahs:227, sp:367},
+{n:27, name:"An-Naml",        ar:"النَّمْل",        ayahs:93,  sp:377},
+{n:28, name:"Al-Qasas",       ar:"الْقَصَص",        ayahs:88,  sp:385},
+{n:29, name:"Al-'Ankabut",    ar:"الْعَنكَبُوت",    ayahs:69,  sp:396},
+{n:30, name:"Ar-Rum",         ar:"الرُّوم",         ayahs:60,  sp:404},
+{n:31, name:"Luqman",         ar:"لُقْمَان",        ayahs:34,  sp:411},
+{n:32, name:"As-Sajdah",      ar:"السَّجْدَة",      ayahs:30,  sp:415},
+{n:33, name:"Al-Ahzab",       ar:"الْأَحْزَاب",     ayahs:73,  sp:418},
+{n:34, name:"Saba",           ar:"سَبَأ",           ayahs:54,  sp:428},
+{n:35, name:"Fatir",          ar:"فَاطِر",          ayahs:45,  sp:434},
+{n:36, name:"Ya-Sin",         ar:"يس",              ayahs:83,  sp:440},
+{n:37, name:"As-Saffat",      ar:"الصَّافَّات",     ayahs:182, sp:446},
+{n:38, name:"Sad",            ar:"ص",               ayahs:88,  sp:453},
+{n:39, name:"Az-Zumar",       ar:"الزُّمَر",        ayahs:75,  sp:458},
+{n:40, name:"Ghafir",         ar:"غَافِر",          ayahs:85,  sp:467},
+{n:41, name:"Fussilat",       ar:"فُصِّلَت",        ayahs:54,  sp:477},
+{n:42, name:"Ash-Shura",      ar:"الشُّورَى",       ayahs:53,  sp:483},
+{n:43, name:"Az-Zukhruf",     ar:"الزُّخْرُف",      ayahs:89,  sp:489},
+{n:44, name:"Ad-Dukhan",      ar:"الدُّخَان",       ayahs:59,  sp:496},
+{n:45, name:"Al-Jathiyah",    ar:"الْجَاثِيَة",     ayahs:37,  sp:499},
+{n:46, name:"Al-Ahqaf",       ar:"الْأَحْقَاف",     ayahs:35,  sp:502},
+{n:47, name:"Muhammad",       ar:"مُحَمَّد",        ayahs:38,  sp:507},
+{n:48, name:"Al-Fath",        ar:"الْفَتْح",        ayahs:29,  sp:511},
+{n:49, name:"Al-Hujurat",     ar:"الْحُجُرَات",     ayahs:18,  sp:515},
+{n:50, name:"Qaf",            ar:"ق",               ayahs:45,  sp:518},
+{n:51, name:"Adh-Dhariyat",   ar:"الذَّارِيَات",    ayahs:60,  sp:520},
+{n:52, name:"At-Tur",         ar:"الطُّور",         ayahs:49,  sp:523},
+{n:53, name:"An-Najm",        ar:"النَّجْم",        ayahs:62,  sp:526},
+{n:54, name:"Al-Qamar",       ar:"الْقَمَر",        ayahs:55,  sp:528},
+{n:55, name:"Ar-Rahman",      ar:"الرَّحْمَٰن",     ayahs:78,  sp:531},
+{n:56, name:"Al-Waqi'ah",     ar:"الْوَاقِعَة",     ayahs:96,  sp:534},
+{n:57, name:"Al-Hadid",       ar:"الْحَدِيد",       ayahs:29,  sp:537},
+{n:58, name:"Al-Mujadila",    ar:"الْمُجَادِلَة",   ayahs:22,  sp:542},
+{n:59, name:"Al-Hashr",       ar:"الْحَشْر",        ayahs:24,  sp:545},
+{n:60, name:"Al-Mumtahanah",  ar:"الْمُمْتَحَنَة",  ayahs:13,  sp:549},
+{n:61, name:"As-Saf",         ar:"الصَّف",          ayahs:14,  sp:551},
+{n:62, name:"Al-Jumu'ah",     ar:"الْجُمُعَة",      ayahs:11,  sp:553},
+{n:63, name:"Al-Munafiqun",   ar:"الْمُنَافِقُون",  ayahs:11,  sp:554},
+{n:64, name:"At-Taghabun",    ar:"التَّغَابُن",     ayahs:18,  sp:556},
+{n:65, name:"At-Talaq",       ar:"الطَّلَاق",       ayahs:12,  sp:558},
+{n:66, name:"At-Tahrim",      ar:"التَّحْرِيم",     ayahs:12,  sp:560},
+{n:67, name:"Al-Mulk",        ar:"الْمُلْك",        ayahs:30,  sp:562},
+{n:68, name:"Al-Qalam",       ar:"الْقَلَم",        ayahs:52,  sp:564},
+{n:69, name:"Al-Haqqah",      ar:"الْحَاقَّة",      ayahs:52,  sp:566},
+{n:70, name:"Al-Ma'arij",     ar:"الْمَعَارِج",     ayahs:44,  sp:568},
+{n:71, name:"Nuh",            ar:"نُوح",            ayahs:28,  sp:570},
+{n:72, name:"Al-Jinn",        ar:"الْجِن",          ayahs:28,  sp:572},
+{n:73, name:"Al-Muzzammil",   ar:"الْمُزَّمِّل",    ayahs:20,  sp:574},
+{n:74, name:"Al-Muddaththir", ar:"الْمُدَّثِّر",    ayahs:56,  sp:575},
+{n:75, name:"Al-Qiyamah",     ar:"الْقِيَامَة",     ayahs:40,  sp:577},
+{n:76, name:"Al-Insan",       ar:"الْإِنسَان",      ayahs:31,  sp:578},
+{n:77, name:"Al-Mursalat",    ar:"الْمُرْسَلَات",   ayahs:50,  sp:580},
+{n:78, name:"An-Naba",        ar:"النَّبَأ",        ayahs:40,  sp:582},
+{n:79, name:"An-Nazi'at",     ar:"النَّازِعَات",    ayahs:46,  sp:583},
+{n:80, name:"Abasa",          ar:"عَبَسَ",          ayahs:42,  sp:585},
+{n:81, name:"At-Takwir",      ar:"التَّكْوِير",     ayahs:29,  sp:586},
+{n:82, name:"Al-Infitar",     ar:"الْإِنفِطَار",    ayahs:19,  sp:587},
+{n:83, name:"Al-Mutaffifin",  ar:"الْمُطَفِّفِين",  ayahs:36,  sp:587},
+{n:84, name:"Al-Inshiqaq",    ar:"الْإِنشِقَاق",    ayahs:25,  sp:589},
+{n:85, name:"Al-Buruj",       ar:"الْبُرُوج",       ayahs:22,  sp:590},
+{n:86, name:"At-Tariq",       ar:"الطَّارِق",       ayahs:17,  sp:591},
+{n:87, name:"Al-A'la",        ar:"الْأَعْلَى",      ayahs:19,  sp:591},
+{n:88, name:"Al-Ghashiyah",   ar:"الْغَاشِيَة",     ayahs:26,  sp:592},
+{n:89, name:"Al-Fajr",        ar:"الْفَجْر",        ayahs:30,  sp:593},
+{n:90, name:"Al-Balad",       ar:"الْبَلَد",        ayahs:20,  sp:594},
+{n:91, name:"Ash-Shams",      ar:"الشَّمْس",        ayahs:15,  sp:595},
+{n:92, name:"Al-Layl",        ar:"اللَّيْل",        ayahs:21,  sp:595},
+{n:93, name:"Ad-Duha",        ar:"الضُّحَى",        ayahs:11,  sp:596},
+{n:94, name:"Ash-Sharh",      ar:"الشَّرْح",        ayahs:8,   sp:596},
+{n:95, name:"At-Tin",         ar:"التِّين",         ayahs:8,   sp:597},
+{n:96, name:"Al-'Alaq",       ar:"الْعَلَق",        ayahs:19,  sp:597},
+{n:97, name:"Al-Qadr",        ar:"الْقَدْر",        ayahs:5,   sp:598},
+{n:98, name:"Al-Bayyinah",    ar:"الْبَيِّنَة",     ayahs:8,   sp:598},
+{n:99, name:"Az-Zalzalah",    ar:"الزَّلْزَلَة",    ayahs:8,   sp:599},
+{n:100,name:"Al-'Adiyat",     ar:"الْعَادِيَات",    ayahs:11,  sp:599},
+{n:101,name:"Al-Qari'ah",     ar:"الْقَارِعَة",     ayahs:11,  sp:600},
+{n:102,name:"At-Takathur",    ar:"التَّكَاثُر",     ayahs:8,   sp:600},
+{n:103,name:"Al-'Asr",        ar:"الْعَصْر",        ayahs:3,   sp:601},
+{n:104,name:"Al-Humazah",     ar:"الْهُمَزَة",      ayahs:9,   sp:601},
+{n:105,name:"Al-Fil",         ar:"الْفِيل",         ayahs:5,   sp:601},
+{n:106,name:"Quraysh",        ar:"قُرَيْش",         ayahs:4,   sp:602},
+{n:107,name:"Al-Ma'un",       ar:"الْمَاعُون",      ayahs:7,   sp:602},
+{n:108,name:"Al-Kawthar",     ar:"الْكَوْثَر",      ayahs:3,   sp:602},
+{n:109,name:"Al-Kafirun",     ar:"الْكَافِرُون",    ayahs:6,   sp:603},
+{n:110,name:"An-Nasr",        ar:"النَّصْر",        ayahs:3,   sp:603},
+{n:111,name:"Al-Masad",       ar:"الْمَسَد",        ayahs:5,   sp:603},
+{n:112,name:"Al-Ikhlas",      ar:"الْإِخْلَاص",     ayahs:4,   sp:604},
+{n:113,name:"Al-Falaq",       ar:"الْفَلَق",        ayahs:5,   sp:604},
+{n:114,name:"An-Nas",         ar:"النَّاس",         ayahs:6,   sp:604}
+];
+
+function surahEndPg(s){if(s.n===114)return 604;return S[s.n].sp-1;}
+function ayahToPage(s,a){
+  const ep=surahEndPg(s),tot=ep-s.sp+1;
+  const r=(a-1)/s.ayahs;
+  return Math.min(ep,s.sp+Math.floor(r*tot));
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let profiles=JSON.parse(localStorage.getItem('tq2_profiles')||'[]');
+let activeId=localStorage.getItem('tq2_active')||null;
+let selS=null;
+
+const getP=()=>profiles.find(p=>p.id===activeId)||null;
+const save=()=>{localStorage.setItem('tq2_profiles',JSON.stringify(profiles));localStorage.setItem('tq2_active',activeId||'');};
+
+// ═══════════════════════════════════════════════
+// SETUP / PROFILE
+// ═══════════════════════════════════════════════
+function renderSetup(){
+  const ec=document.getElementById('existingCard'),pl=document.getElementById('profileList');
+  if(profiles.length){
+    ec.style.display='block';
+    pl.innerHTML=profiles.map(p=>`<div class="p-item${p.id===activeId?' sel':''}" onclick="selProfile('${p.id}')"><div class="p-av">${p.name[0].toUpperCase()}</div><div style="flex:1;"><div class="p-name">${p.name}</div><div class="p-stat">${p.logs.length} sessions · p.${(p.totalPg||0)+1} · Juz ${pageToJuz((p.totalPg||0)+1)}</div></div><button onclick="event.stopPropagation();promptDeleteProfile('${p.id}')" style="background:rgba(232,64,64,.1);border:1.5px solid rgba(232,64,64,.25);color:#e84040;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;font-family:Nunito,sans-serif;cursor:pointer;flex-shrink:0;">Delete</button></div>`).join('');
+  }else ec.style.display='none';
+}
+function selProfile(id){activeId=id;save();showApp();}
+let setupSelSurah=null;
+
+function filterSetupSurahs(){
+  const q=document.getElementById('setupSurahInput').value.trim().toLowerCase();
+  const dd=document.getElementById('setupSsDd');
+  if(!q){dd.classList.remove('open');setupSelSurah=null;document.getElementById('setupSelBadge').style.display='none';document.getElementById('setupAyahRow').style.display='none';document.getElementById('setupPagePreview').style.display='none';return;}
+  const m=S.filter(s=>s.name.toLowerCase().includes(q)||s.ar.includes(q)||String(s.n)===q||s.name.toLowerCase().replace(/[' \-]/g,'').includes(q.replace(/[' \-]/g,''))).slice(0,10);
+  if(!m.length){dd.classList.remove('open');return;}
+  dd.innerHTML=m.map(s=>`<div class="ss-opt" onclick="pickSetupSurah(${s.n})"><div><span style="font-size:10px;color:var(--muted);font-weight:700;">${s.n}.</span><span style="margin-left:6px;">${s.name}</span><div class="ss-opt-info">${s.ayahs} ayahs · p.${s.sp} · Juz ${pageToJuz(s.sp)}</div></div><div class="ss-opt-ar">${s.ar}</div></div>`).join('');
+  dd.classList.add('open');
+}
+function pickSetupSurah(n){
+  setupSelSurah=S.find(s=>s.n===n);
+  document.getElementById('setupSurahInput').value=`${setupSelSurah.n}. ${setupSelSurah.name}`;
+  document.getElementById('setupSsDd').classList.remove('open');
+  document.getElementById('setupSelBadge').style.display='block';
+  document.getElementById('setupSelName').textContent=`${setupSelSurah.n}. ${setupSelSurah.name}`;
+  document.getElementById('setupSelAr').textContent=setupSelSurah.ar;
+  document.getElementById('setupSelMeta').textContent=`${setupSelSurah.ayahs} ayahs · starts p.${setupSelSurah.sp} · Juz ${pageToJuz(setupSelSurah.sp)}`;
+  document.getElementById('setupAyahRow').style.display='block';
+  document.getElementById('setupAyahInput').value=1;
+  document.getElementById('setupAyahInput').max=setupSelSurah.ayahs;
+  updateSetupPreview();
+}
+function updateSetupPreview(){
+  if(!setupSelSurah)return;
+  const ayah=parseInt(document.getElementById('setupAyahInput').value)||1;
+  const pg = ayah<=1 ? setupSelSurah.sp : ayahToPage(setupSelSurah,ayah);
+  const juz=pageToJuz(pg);
+  const doneJuzCount=completedJuz(pg-1); // juz fully completed BEFORE this page
+  const prev=document.getElementById('setupPagePreview');
+  prev.style.display='block';
+  prev.innerHTML=`Starting at page ${pg} · Juz ${juz}<br>✓ Juz 1–${doneJuzCount} will be marked complete · Juz ${juz} in progress`;
+}
+function createProfile(){
+  const n=document.getElementById('profileNameInput').value.trim();
+  if(!n){alert('Please enter a name.');return;}
+  // Calculate baseline pages from starting position
+  let startPg=0,curSurahN=1,curAyah=1;
+  // Try to resolve surah from text input if dropdown wasn't explicitly used
+  if(!setupSelSurah){
+    const txt=document.getElementById('setupSurahInput').value.trim().toLowerCase();
+    if(txt){
+      const match=S.find(s=>
+        s.name.toLowerCase()===txt||
+        String(s.n)===txt||
+        txt===`${s.n}. ${s.name}`.toLowerCase()||
+        s.name.toLowerCase().startsWith(txt)
+      );
+      if(match) setupSelSurah=match;
+    }
+  }
+  if(setupSelSurah){
+    const ayahEl=document.getElementById('setupAyahInput');
+    const ayah=parseInt(ayahEl?ayahEl.value:1)||1;
+    const startPosPg=ayah<=1?setupSelSurah.sp:ayahToPage(setupSelSurah,ayah);
+    startPg=Math.max(0,startPosPg-1);
+    curSurahN=setupSelSurah.n;
+    curAyah=ayah;
+    console.log('[Tilawah] Start: '+setupSelSurah.name+' ayah '+ayah+' -> startPg='+startPg);
+  }
+  const p={id:Date.now().toString(),name:n,logs:[],totalPg:startPg,startPg,curSurahN,curAyah,startSurahN:curSurahN,startAyah:curAyah};
+  console.log(`[Tilawah v${APP_VERSION}] Profile created: ${n}, startPg=${startPg}, curSurahN=${curSurahN}, curAyah=${curAyah}`);
+  profiles.push(p);activeId=p.id;save();
+  document.getElementById('profileNameInput').value='';
+  document.getElementById('setupSurahInput').value='';
+  setupSelSurah=null;
+  document.getElementById('setupSelBadge').style.display='none';
+  document.getElementById('setupAyahRow').style.display='none';
+  document.getElementById('setupPagePreview').style.display='none';
+  showApp();
+}
+function goSetup(){
+  document.getElementById('setupScreen').classList.add('active');
+  ['home','log','history','stats'].forEach(t=>document.getElementById(t+'Screen').classList.remove('active'));
+  document.getElementById('bnav').style.display='none';
+  renderSetup();
+}
+function showApp(){
+  document.getElementById('setupScreen').classList.remove('active');
+  document.getElementById('bnav').style.display='flex';
+  goTab('home');
+}
+
+// ═══════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════
+function goTab(tab){
+  ['home','log','history','stats'].forEach(t=>{
+    document.getElementById(t+'Screen').classList.remove('active');
+    const nb=document.getElementById('nav-'+t);
+    if(nb)nb.classList.remove('active');
+  });
+  document.getElementById(tab+'Screen').classList.add('active');
+  const nb=document.getElementById('nav-'+tab);if(nb)nb.classList.add('active');
+  if(tab==='home')renderHome();
+  if(tab==='log')renderLog();
+  if(tab==='history')renderHistory();
+  if(tab==='stats')renderStats();
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+function prevDay(d){const dt=new Date(d);dt.setDate(dt.getDate()-1);return dt.toISOString().slice(0,10);}
+function addDays(d,n){const dt=new Date(d);dt.setDate(dt.getDate()+n);return dt.toISOString().slice(0,10);}
+function fmtDate(d){return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+// ═══════════════════════════════════════════════
+// STATS COMPUTATION
+// Key fix: juz progress uses page-based JUZ_PAGES boundaries,
+// not a simple /20 division
+// ═══════════════════════════════════════════════
+function calcStats(p){
+  const logs=p.logs||[],tp=p.totalPg||0,left=604-tp,pct=Math.min(100,tp/604*100);
+  const dates=[...new Set(logs.map(l=>l.date))].sort();
+  const days=dates.length;
+  // avg must use only pages logged in sessions, NOT the baseline startPg
+  // so a user who started mid-Quran doesn't get a wildly inflated avg
+  const sessionPgs=logs.reduce((s,l)=>s+(l.pages||0),0);
+  const avg=days>0?sessionPgs/days:0;
+  let streak=0,check=todayStr();
+  while(dates.includes(check)){streak++;check=prevDay(check);}
+  const etaDays=avg>0?Math.ceil(left/avg):null;
+  const etaDate=etaDays?addDays(todayStr(),etaDays):null;
+  const juzSt=juzStatusArr(tp);
+  const doneJuz=completedJuz(tp);
+  const trend=[];
+  for(let i=13;i>=0;i--){
+    const d=addDays(todayStr(),-i);
+    const pg=logs.filter(l=>l.date===d).reduce((s,l)=>s+(l.pages||0),0);
+    trend.push({d,pg,lbl:d.slice(8)});
+  }
+  return{tp,left,pct,days,avg,streak,etaDays,etaDate,juzSt,doneJuz,trend,logs};
+}
+
+// ═══════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════
+function renderHome(){
+  const p=getP();if(!p)return;
+  const s=calcStats(p);
+  document.getElementById('tpAv').textContent=p.name[0].toUpperCase();
+  document.getElementById('tpName').textContent=p.name;
+  document.getElementById('tpSub').textContent=`${s.days} sessions · ${new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}`;
+  document.getElementById('hPg').innerHTML=`${s.tp} <span>/ 604 pages</span>`;
+  document.getElementById('hPct').textContent=s.pct.toFixed(1)+'%';
+  document.getElementById('hFill').style.width=s.pct+'%';
+  document.getElementById('hLeft').textContent=`${s.left} pages left`;
+  document.getElementById('hJuzProg').textContent=`Juz ${s.doneJuz} / 30 done`;
+  document.getElementById('hEtaD').textContent=s.etaDate?fmtDate(s.etaDate):'—';
+  document.getElementById('hEtaSub').textContent=s.etaDays?`~${s.etaDays} days away`:'log more to predict';
+  document.getElementById('hAvg').textContent=s.avg>0?s.avg.toFixed(1):'—';
+  document.getElementById('hDays').textContent=s.days;
+  document.getElementById('hStreak').textContent=s.streak;
+  // Last session
+  const ll=p.logs[p.logs.length-1];
+  if(ll){
+    const su=S.find(x=>x.n===ll.sN)||{};
+    const pIcon={Fajr:'🌅',Dzuhur:'☀️',Asr:'🌤',Maghrib:'🌇',Isya:'🌙',Other:'📖'}[ll.prayer]||'📖';
+    const lLabel=ll.label||(ll.eN&&ll.eN!==ll.sN?`${ll.sName} → ${ll.eName}`:ll.sName);
+    const aLabel=ll.eN&&ll.eN!==ll.sN?`${ll.sName} ${ll.fa} → ${ll.eName} ${ll.ta}`:`Ayah ${ll.fa}–${ll.ta}`;
+    document.getElementById('hLastSurah').textContent=`${pIcon} ${lLabel}`;
+    document.getElementById('hLastDetail').innerHTML=`${aLabel} · ${ll.pages} page${ll.pages!==1?'s':''}<br>Page ${ll.sp}–${ll.ep} · Juz ${pageToJuz(ll.sp)} · ${ll.date}`;
+  }else{
+    document.getElementById('hLastSurah').textContent='No sessions yet';
+    document.getElementById('hLastDetail').textContent='Tap Log Session to begin';
+  }
+  // Juz grid
+  const grid=document.getElementById('hJuzGrid');grid.innerHTML='';
+  s.juzSt.forEach((st,i)=>{
+    const c=document.createElement('div');
+    const cls={done:'jd',cur:'jcur',empty:'je',partial:'jp'}[st]||'je';
+    c.className=`jc ${cls}`;c.textContent=i+1;
+    c.title=`Juz ${i+1}: p${JUZ_PAGES[i].startPg}–${juzEndPg(i+1)}`;
+    grid.appendChild(c);
+  });
+  // Trend bars
+  const barsEl=document.getElementById('hBars');barsEl.innerHTML='';
+  const mx=Math.max(...s.trend.map(t=>t.pg),1);
+  const avgT=s.trend.reduce((a,b)=>a+b.pg,0)/14;
+  document.getElementById('hTrendAvg').textContent=`avg ${avgT.toFixed(1)} pg`;
+  s.trend.forEach((t,i)=>{
+    const col=document.createElement('div');col.className='bc';
+    const bar=document.createElement('div');bar.className='br';
+    bar.style.height=`${Math.max(3,t.pg/mx*42)}px`;
+    if(i===13)bar.classList.add('td');else if(t.pg>avgT)bar.classList.add('hi');
+    const lbl=document.createElement('div');lbl.className='bd';lbl.textContent=t.lbl;
+    col.appendChild(bar);col.appendChild(lbl);barsEl.appendChild(col);
+  });
+  // Khatam banner
+  const kb=document.getElementById('khatamBanner');
+  if(p.totalPg>=604){
+    const kn=(p.khatams&&p.khatams.length)||1;
+    kb.style.display='block';
+    kb.innerHTML=`<div class="khatam-banner"><div class="kb-lbl">Khatam #${kn} Completed 🎉</div><div class="kb-title">Alhamdulillah!</div><div class="kb-sub">You've read the full Quran ${kn} time${kn>1?'s':''}. Ready to start again?</div><button class="kb-btn" onclick="openModal('khatamModal')">🏆 View & Start New</button></div>`;
+  } else {
+    kb.style.display='none';
+  }
+  // GSheet
+  const gsUrl=localStorage.getItem('tq2_gs');
+  document.getElementById('hGsDot').style.background=gsUrl?'var(--grn)':'var(--muted)';
+  document.getElementById('hGsSub').textContent=gsUrl?'Connected · tap Stats to manage':'Not connected · tap Stats to configure';
+}
+
+// ═══════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════
+let selSEnd=null; // end surah (may differ from start)
+let activePrayer='Fajr';
+
+function selectPrayer(el,name){
+  document.querySelectorAll('.pchip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  activePrayer=name;
+}
+
+function renderLog(){
+  const p=getP();if(!p)return;
+  const today=new Date();
+  document.getElementById('logDate').textContent=`${today.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}`;
+  document.getElementById('logProf').textContent=`Profile: ${p.name}`;
+  // Reset all fields
+  document.getElementById('ssInput').value='';
+  document.getElementById('ssInputEnd').value='';
+  document.getElementById('selBadge').style.display='none';
+  document.getElementById('selBadgeEnd').style.display='none';
+  document.getElementById('fromAyah').value='';
+  document.getElementById('toAyah').value='';
+  document.getElementById('pgOvr').value='';
+  document.getElementById('logNotes').value='';
+  document.getElementById('logDate2').value=todayStr();
+  document.getElementById('cbVal').textContent='—';
+  document.getElementById('cbSub').textContent='Fill start & end positions';
+  document.getElementById('juzBadge').style.display='none';
+  document.getElementById('spanSummary').style.display='none';
+  // Reset prayer chips to Fajr
+  document.querySelectorAll('.pchip').forEach((c,i)=>{c.classList.toggle('active',i===0);});
+  activePrayer='Fajr';
+  selS=null;selSEnd=null;
+  // Pre-fill start position from profile's current position
+  if(p.curSurahN){
+    const su=S.find(x=>x.n===p.curSurahN);
+    if(su){
+      selS=su;
+      document.getElementById('ssInput').value=`${su.n}. ${su.name}`;
+      showSel(su);
+      if(p.curAyah){document.getElementById('fromAyah').value=p.curAyah;}
+    }
+  }
+  recalc();
+}
+
+// Surah search — START
+function filterSurahs(){
+  const q=document.getElementById('ssInput').value.trim().toLowerCase();
+  const dd=document.getElementById('ssDd');
+  if(!q){dd.classList.remove('open');return;}
+  const m=surahSearch(q);
+  if(!m.length){dd.classList.remove('open');return;}
+  dd.innerHTML=m.map(s=>`<div class="ss-opt" onclick="pickSurah(${s.n})"><div><span style="font-size:10px;color:var(--muted);font-weight:700;">${s.n}.</span><span style="margin-left:6px;">${s.name}</span><div class="ss-opt-info">${s.ayahs} ayahs · p.${s.sp} · Juz ${pageToJuz(s.sp)}</div></div><div class="ss-opt-ar">${s.ar}</div></div>`).join('');
+  dd.classList.add('open');
+}
+function pickSurah(n){
+  selS=S.find(s=>s.n===n);
+  document.getElementById('ssInput').value=`${selS.n}. ${selS.name}`;
+  document.getElementById('ssDd').classList.remove('open');
+  showSel(selS);
+  // If no end surah set yet, default end = same surah
+  if(!selSEnd){
+    selSEnd=selS;
+    document.getElementById('ssInputEnd').value=`${selS.n}. ${selS.name} (same)`;
+    showSelEnd(selS,true);
+  }
+  recalc();
+}
+function showSel(s){
+  document.getElementById('selBadge').style.display='block';
+  document.getElementById('sbName').textContent=`${s.n}. ${s.name}`;
+  document.getElementById('sbAr').textContent=s.ar;
+  document.getElementById('sbMeta').textContent=`${s.ayahs} ayahs · p.${s.sp} · Juz ${pageToJuz(s.sp)}`;
+}
+
+// Surah search — END
+function filterSurahsEnd(){
+  const q=document.getElementById('ssInputEnd').value.trim().toLowerCase();
+  const dd=document.getElementById('ssDdEnd');
+  if(!q){dd.classList.remove('open');return;}
+  const m=surahSearch(q);
+  if(!m.length){dd.classList.remove('open');return;}
+  dd.innerHTML=m.map(s=>`<div class="ss-opt" onclick="pickSurahEnd(${s.n})"><div><span style="font-size:10px;color:var(--muted);font-weight:700;">${s.n}.</span><span style="margin-left:6px;">${s.name}</span><div class="ss-opt-info">${s.ayahs} ayahs · p.${s.sp} · Juz ${pageToJuz(s.sp)}</div></div><div class="ss-opt-ar">${s.ar}</div></div>`).join('');
+  dd.classList.add('open');
+}
+function pickSurahEnd(n){
+  selSEnd=S.find(s=>s.n===n);
+  document.getElementById('ssInputEnd').value=`${selSEnd.n}. ${selSEnd.name}`;
+  document.getElementById('ssDdEnd').classList.remove('open');
+  showSelEnd(selSEnd,false);
+  recalc();
+}
+function showSelEnd(s,same){
+  document.getElementById('selBadgeEnd').style.display='block';
+  document.getElementById('sbNameEnd').textContent=same?`${s.n}. ${s.name} (same as start)`:`${s.n}. ${s.name}`;
+  document.getElementById('sbArEnd').textContent=s.ar;
+  document.getElementById('sbMetaEnd').textContent=`${s.ayahs} ayahs · p.${s.sp} · Juz ${pageToJuz(s.sp)}`;
+}
+
+function surahSearch(q){
+  return S.filter(s=>
+    s.name.toLowerCase().includes(q)||
+    s.ar.includes(q)||
+    String(s.n)===q||
+    s.name.toLowerCase().replace(/[' \-]/g,'').includes(q.replace(/[' \-]/g,''))
+  ).slice(0,10);
+}
+
+function recalc(){
+  const ov=parseInt(document.getElementById('pgOvr').value);
+  const fr=parseInt(document.getElementById('fromAyah').value);
+  const to=parseInt(document.getElementById('toAyah').value);
+  const spanEl=document.getElementById('spanSummary');
+
+  if(ov>0){
+    document.getElementById('cbVal').textContent=ov;
+    document.getElementById('cbSub').textContent='Manual override';
+    spanEl.style.display='none';
+    checkJuzBadge(ov);return;
+  }
+  if(!selS||!fr){document.getElementById('cbVal').textContent='—';spanEl.style.display='none';return;}
+
+  // Determine effective end surah — default to start surah
+  const endSurah=selSEnd||selS;
+
+  // Validate: end surah must be >= start surah
+  if(endSurah.n<selS.n){
+    document.getElementById('cbVal').textContent='!';
+    document.getElementById('cbSub').textContent='End surah must be ≥ start surah';
+    spanEl.style.display='none';return;
+  }
+
+  const sp=ayahToPage(selS,fr);
+  let ep,pg;
+
+  if(!to){document.getElementById('cbVal').textContent='—';spanEl.style.display='none';return;}
+
+  if(endSurah.n===selS.n){
+    // Same surah — simple range
+    if(to<fr){document.getElementById('cbVal').textContent='—';spanEl.style.display='none';return;}
+    ep=ayahToPage(selS,to);
+    pg=Math.max(1,ep-sp+1);
+    spanEl.style.display='none';
+  } else {
+    // Cross-surah: start surah from fr→end, then end surah from 1→to
+    ep=ayahToPage(endSurah,to);
+    pg=Math.max(1,ep-sp+1);
+    // Show span summary
+    const midSurahs=endSurah.n-selS.n-1;
+    let summary=`${selS.name} ${fr}–${selS.ayahs} · `;
+    if(midSurahs===1) summary+=`${S[selS.n].name} (full) · `;
+    else if(midSurahs>1) summary+=`${midSurahs} full surahs · `;
+    summary+=`${endSurah.name} 1–${to}`;
+    spanEl.style.display='block';
+    spanEl.textContent=`📖 ${summary}`;
+  }
+
+  document.getElementById('cbVal').textContent=pg;
+  document.getElementById('cbSub').textContent=`p.${sp}–${ep}`;
+  checkJuzBadge(pg);
+}
+
+function checkJuzBadge(pg){
+  const p=getP();if(!p)return;
+  const cur=p.totalPg||0,after=cur+pg;
+  const doneBefore=completedJuz(cur),doneAfter=completedJuz(after);
+  const badge=document.getElementById('juzBadge');
+  if(doneAfter>doneBefore){badge.style.display='block';badge.textContent=`🎉 This completes Juz ${doneAfter}!`;}
+  else badge.style.display='none';
+}
+
+function saveLog(){
+  const p=getP();if(!p)return;
+  if(!selS){alert('Please select a starting surah.');return;}
+  const fr=parseInt(document.getElementById('fromAyah').value);
+  const to=parseInt(document.getElementById('toAyah').value);
+  if(!fr){alert('Please enter a starting ayah.');return;}
+  if(!to){alert('Please enter an ending ayah.');return;}
+  const endSurah=selSEnd||selS;
+  if(endSurah.n===selS.n&&to<fr){alert('End ayah must be ≥ start ayah when in the same surah.');return;}
+  if(endSurah.n<selS.n){alert('End surah must be ≥ start surah.');return;}
+  const ov=parseInt(document.getElementById('pgOvr').value);
+  const sp=ayahToPage(selS,fr);
+  const ep=ayahToPage(endSurah,to);
+  const pg=ov>0?ov:Math.max(1,ep-sp+1);
+  const logDate=document.getElementById('logDate2').value||todayStr();
+  // Build display label for cross-surah span
+  const surahLabel=endSurah.n===selS.n
+    ?selS.name
+    :`${selS.name} → ${endSurah.name}`;
+  const entry={
+    id:Date.now(),date:logDate,prayer:activePrayer,
+    sN:selS.n,sName:selS.name,fa:fr,
+    eN:endSurah.n,eName:endSurah.name,ta:to,
+    sp,ep,pages:pg,
+    label:surahLabel,
+    notes:document.getElementById('logNotes').value.trim()
+  };
+  const prevDone=completedJuz(p.totalPg||0);
+  const wasKhatam=p.totalPg>=604;
+  p.logs.push(entry);
+  // Use actual end page (ep) as the new position — not additive.
+  // This ensures Juz grid reflects real position in the Quran,
+  // even if user created profile without setting a starting position.
+  // Take max so progress never goes backward (e.g. retrospective logs).
+  const newTotalPg = ov>0 ? Math.min(604,(p.totalPg||0)+pg) : Math.min(604, Math.max(p.totalPg||0, ep));
+  p.totalPg = newTotalPg;
+  const nowDone=completedJuz(p.totalPg);
+  // Advance current position to after end surah
+  if(to>=endSurah.ayahs&&endSurah.n<114){p.curSurahN=endSurah.n+1;p.curAyah=1;}
+  else{p.curSurahN=endSurah.n;p.curAyah=to+1;}
+  // Detect khatam completion (hit page 604 for first time this round)
+  const justKhatam=!wasKhatam&&p.totalPg>=604;
+  if(justKhatam){
+    if(!p.khatams)p.khatams=[];
+    p.khatams.push({date:todayStr(),num:p.khatams.length+1});
+  }
+  save();
+  const juzMsg=nowDone>prevDone?` 🎉 Juz ${nowDone} complete!`:'';
+  toast(`✓ ${pg} page${pg!==1?'s':''} saved!${juzMsg}`);
+  // Auto-sync new entry to Google Sheets
+  const gsUrl=localStorage.getItem('tq2_gs');
+  if(gsUrl) postToSheet(entryPayload(entry, p.name));
+  if(justKhatam){
+    // Show khatam modal after short delay
+    setTimeout(()=>{
+      document.getElementById('khatamCountDisplay').textContent=p.khatams.length;
+      openModal('khatamModal');
+    },1000);
+  } else {
+    setTimeout(()=>goTab('home'),900);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════
+function renderHistory(){
+  const p=getP();if(!p)return;
+  document.getElementById('histSub').textContent=`${p.name} · ${p.logs.length} sessions`;
+  const c=document.getElementById('logEntries');
+  const logs=[...(p.logs||[])].reverse();
+  if(!logs.length){c.innerHTML='<div class="empty-state">No sessions yet.<br>Start logging your Fajr tilawah!</div>';return;}
+  c.innerHTML=logs.map(l=>{
+    const prayerIcon={Fajr:'🌅',Dzuhur:'☀️',Asr:'🌤',Maghrib:'🌇',Isya:'🌙',Other:'📖'}[l.prayer]||'📖';
+    const surahLabel=l.label||(l.eN&&l.eN!==l.sN?`${l.sName} → ${l.eName||''}`:l.sName);
+    const ayahLabel=l.eN&&l.eN!==l.sN?`${l.sName} ${l.fa} → ${l.eName||''} ${l.ta}`:`Ayah ${l.fa}–${l.ta}`;
+    return `<div class="card lc">
+      <div class="lc-dot" style="font-size:14px;background:none;color:var(--pink);">${prayerIcon}</div>
+      <div class="lc-main">
+        <div class="lc-date">${l.date} · ${l.prayer||'Fajr'} · Juz ${pageToJuz(l.sp)}</div>
+        <div class="lc-surah">${surahLabel}</div>
+        <div class="lc-detail">${ayahLabel} · Page ${l.sp}–${l.ep}${l.notes?` · 📝 ${l.notes}`:''}</div>
+        <button class="lc-edit" onclick="openEditLog('${l.id}')">✏️ Edit</button>
+      </div>
+      <div class="lc-pg"><div class="lc-pv">${l.pages}</div><div class="lc-pl">pages</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════
+function renderStats(){
+  const p=getP();if(!p)return;
+  const s=calcStats(p);
+  document.getElementById('stPg').textContent=s.tp;
+  document.getElementById('stLeft').textContent=s.left;
+  document.getElementById('stAvg').textContent=s.avg>0?s.avg.toFixed(1):'—';
+  document.getElementById('stSess').textContent=s.logs.length;
+  document.getElementById('stStreak').textContent=s.streak+' day'+(s.streak!==1?'s':'');
+  // Khatam count
+  const khatams=p.khatams||[];
+  document.getElementById('kcVal').textContent=khatams.length;
+  document.getElementById('kcHistory').innerHTML=khatams.length
+    ?khatams.map(k=>`<div class="kc-entry">Khatam #${k.num} · ${k.date}</div>`).join('')
+    :'<div class="kc-entry">No khatam yet — keep reading!</div>';
+  const pr=document.getElementById('paceRows');
+  if(s.avg>0){
+    pr.innerHTML=[
+      {name:'At current pace',pg:s.avg},
+      {name:'2 pages / day',pg:2},
+      {name:'3 pages / day',pg:3},
+      {name:'4 pages / day',pg:4},
+    ].map(sc=>{
+      const d=Math.ceil(s.left/sc.pg),dt=fmtDate(addDays(todayStr(),d));
+      return`<div class="pace-row"><div><div class="pace-name">${sc.name}</div><div class="pace-desc">${d} days · ${Number.isInteger(sc.pg)?sc.pg:sc.pg.toFixed(1)} pg/day</div></div><div class="pace-date">${dt}</div></div>`;
+    }).join('');
+  }else pr.innerHTML='<div class="empty-state" style="padding:12px;">Log sessions to see predictions</div>';
+  const gsUrl=localStorage.getItem('tq2_gs');
+  if(gsUrl){
+    document.getElementById('gsUrl').value=gsUrl;
+    updateSyncStatus('connected');
+  } else {
+    updateSyncStatus('none');
+  }
+  const gsSheetUrl=localStorage.getItem('tq2_gs_sheet');
+  if(gsSheetUrl) document.getElementById('gsSheetUrl').value=gsSheetUrl;
+}
+
+// ═══════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function handleModalClick(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+
+function startNewKhatam(){
+  const p=getP();if(!p)return;
+  closeModal('khatamModal');
+  // Reset progress but keep khatam history and logs
+  p.totalPg=0;
+  p.startPg=0;
+  p.curSurahN=1;
+  p.curAyah=1;
+  save();
+  toast('🌙 New khatam started — Bismillah!');
+  setTimeout(()=>goTab('home'),600);
+}
+
+function confirmClear(){
+  const p=getP();if(!p)return;
+  closeModal('clearModal');
+  // Clear logs and reset progress; keep profile name and khatam count
+  p.logs=[];
+  p.totalPg=p.startPg||0;
+  // Reset current position back to the profile's original starting surah/ayah
+  // (not always surah 1 — user may have started mid-Quran)
+  const startSurah = S.find(s => s.sp > (p.startPg||0)) || S[0];
+  p.curSurahN = p.startSurahN || startSurah.n;
+  p.curAyah   = p.startAyah   || 1;
+  save();
+  toast('✓ Reading log cleared.');
+  goTab('history');
+}
+
+let profileToDelete=null;
+function promptDeleteProfile(id){
+  const p=profiles.find(x=>x.id===id);if(!p)return;
+  profileToDelete=id;
+  document.getElementById('deleteProfileNameDisplay').textContent=p.name;
+  document.getElementById('deleteProfileTitle').textContent=`Delete "${p.name}"?`;
+  openModal('deleteProfileModal');
+}
+function confirmDeleteProfile(){
+  if(!profileToDelete)return;
+  profiles=profiles.filter(p=>p.id!==profileToDelete);
+  if(activeId===profileToDelete){
+    activeId=profiles.length?profiles[0].id:null;
+  }
+  profileToDelete=null;
+  save();
+  closeModal('deleteProfileModal');
+  toast('✓ Profile deleted.');
+  if(!profiles.length||!activeId){
+    goSetup();
+  } else {
+    renderSetup();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// EDIT LOG
+// ═══════════════════════════════════════════════
+let editLogId=null;
+let editSelSurah=null;
+
+function openEditLog(idStr){
+  const p=getP();if(!p)return;
+  const id=parseInt(idStr);
+  const entry=p.logs.find(l=>l.id===id);
+  if(!entry)return;
+  editLogId=id;
+  editSelSurah=S.find(s=>s.n===entry.sN)||null;
+
+  // Populate fields
+  document.getElementById('editLogSubtitle').textContent=`${entry.date} · ${entry.sName}`;
+  document.getElementById('editSurahInput').value=`${entry.sN}. ${entry.sName}`;
+  document.getElementById('editFromAyah').value=entry.fa;
+  document.getElementById('editToAyah').value=entry.ta;
+  document.getElementById('editPgOvr').value='';
+  document.getElementById('editDate').value=entry.date;
+  document.getElementById('editNotes').value=entry.notes||'';
+
+  // Show selected surah badge
+  if(editSelSurah){
+    document.getElementById('editSelBadge').style.display='block';
+    document.getElementById('editSelName').textContent=`${editSelSurah.n}. ${editSelSurah.name}`;
+    document.getElementById('editSelAr').textContent=editSelSurah.ar;
+    document.getElementById('editSelMeta').textContent=`${editSelSurah.ayahs} ayahs · starts p.${editSelSurah.sp} · Juz ${pageToJuz(editSelSurah.sp)}`;
+  }
+  document.getElementById('editCalcVal').textContent=entry.pages;
+  document.getElementById('editCalcSub').textContent=`Page ${entry.sp}–${entry.ep}`;
+  openModal('editLogModal');
+}
+
+function filterEditSurahs(){
+  const q=document.getElementById('editSurahInput').value.trim().toLowerCase();
+  const dd=document.getElementById('editSsDd');
+  if(!q){dd.classList.remove('open');return;}
+  const m=S.filter(s=>s.name.toLowerCase().includes(q)||s.ar.includes(q)||String(s.n)===q||s.name.toLowerCase().replace(/[' \-]/g,'').includes(q.replace(/[' \-]/g,''))).slice(0,10);
+  if(!m.length){dd.classList.remove('open');return;}
+  dd.innerHTML=m.map(s=>`<div class="ss-opt" onclick="pickEditSurah(${s.n})"><div><span style="font-size:10px;color:var(--muted);font-weight:700;">${s.n}.</span><span style="margin-left:6px;">${s.name}</span><div class="ss-opt-info">${s.ayahs} ayahs · p.${s.sp} · Juz ${pageToJuz(s.sp)}</div></div><div class="ss-opt-ar">${s.ar}</div></div>`).join('');
+  dd.classList.add('open');
+}
+function pickEditSurah(n){
+  editSelSurah=S.find(s=>s.n===n);
+  document.getElementById('editSurahInput').value=`${editSelSurah.n}. ${editSelSurah.name}`;
+  document.getElementById('editSsDd').classList.remove('open');
+  document.getElementById('editSelBadge').style.display='block';
+  document.getElementById('editSelName').textContent=`${editSelSurah.n}. ${editSelSurah.name}`;
+  document.getElementById('editSelAr').textContent=editSelSurah.ar;
+  document.getElementById('editSelMeta').textContent=`${editSelSurah.ayahs} ayahs · starts p.${editSelSurah.sp} · Juz ${pageToJuz(editSelSurah.sp)}`;
+  recalcEdit();
+}
+function recalcEdit(){
+  const ov=parseInt(document.getElementById('editPgOvr').value);
+  if(ov>0){document.getElementById('editCalcVal').textContent=ov;document.getElementById('editCalcSub').textContent='Manual override';return;}
+  if(!editSelSurah)return;
+  const fr=parseInt(document.getElementById('editFromAyah').value),to=parseInt(document.getElementById('editToAyah').value);
+  if(!fr||!to||to<fr){document.getElementById('editCalcVal').textContent='—';return;}
+  const sp=ayahToPage(editSelSurah,fr),ep=ayahToPage(editSelSurah,to),pg=Math.max(1,ep-sp+1);
+  document.getElementById('editCalcVal').textContent=pg;
+  document.getElementById('editCalcSub').textContent=`Estimated p.${sp}–${ep}`;
+}
+function saveEditLog(){
+  const p=getP();if(!p)return;
+  if(!editSelSurah){alert('Please select a surah.');return;}
+  const fr=parseInt(document.getElementById('editFromAyah').value),to=parseInt(document.getElementById('editToAyah').value);
+  if(!fr||!to||to<fr){alert('Please enter a valid ayah range.');return;}
+  const ov=parseInt(document.getElementById('editPgOvr').value);
+  const sp=ayahToPage(editSelSurah,fr),ep=ayahToPage(editSelSurah,to),pg=ov>0?ov:Math.max(1,ep-sp+1);
+  const date=document.getElementById('editDate').value||todayStr();
+  const notes=document.getElementById('editNotes').value.trim();
+
+  const idx=p.logs.findIndex(l=>l.id===editLogId);
+  if(idx===-1)return;
+  p.logs[idx]={...p.logs[idx],sN:editSelSurah.n,sName:editSelSurah.name,fa:fr,ta:to,sp,ep,pages:pg,date,notes};
+  // Recompute totalPg from scratch: max end page across all logs (capped at 604)
+  // This is consistent with saveLog and avoids arithmetic drift from edits.
+  const maxEp = p.logs.reduce((m,l) => Math.max(m, l.ep||0), p.startPg||0);
+  p.totalPg = Math.min(604, maxEp);
+  save();
+  closeModal('editLogModal');
+  toast('✓ Session updated!');
+  // Sync edit to GSheet
+  const gsUrlE = localStorage.getItem('tq2_gs');
+  if(gsUrlE){
+    const edited = p.logs[idx];
+    postToSheet({action:'edit', profile:p.name,
+      id:edited.id, date:edited.date, prayer:edited.prayer||'Fajr',
+      startSurahN:edited.sN, startSurahName:edited.sName, fromAyah:edited.fa,
+      endSurahN:edited.eN||edited.sN, endSurahName:edited.eName||edited.sName,
+      toAyah:edited.ta, startPage:edited.sp, endPage:edited.ep,
+      pages:edited.pages, notes:edited.notes||''});
+  }
+  renderHistory();
+}
+function deleteLogEntry(){
+  const p=getP();if(!p)return;
+  const idx=p.logs.findIndex(l=>l.id===editLogId);
+  if(idx===-1)return;
+  p.logs.splice(idx,1);
+  // Recompute totalPg from remaining logs after deletion
+  const maxEpDel = p.logs.reduce((m,l) => Math.max(m, l.ep||0), p.startPg||0);
+  p.totalPg = Math.min(604, maxEpDel);
+  const deletedId = editLogId;
+  save();
+  closeModal('editLogModal');
+  toast('✓ Entry deleted.');
+  // Sync delete to GSheet
+  const gsUrlD = localStorage.getItem('tq2_gs');
+  if(gsUrlD) postToSheet({action:'delete', profile:p.name, id:deletedId});
+  renderHistory();
+}
+
+// ═══════════════════════════════════════════════
+// GSHEET SYNC — real POST implementation
+// ═══════════════════════════════════════════════
+
+async function postToSheet(payload) {
+  const url = localStorage.getItem('tq2_gs');
+  if (!url) return null;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      // text/plain avoids CORS preflight; Apps Script accepts it
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    console.warn('GSheet sync failed:', err);
+    return null;
+  }
+}
+
+// Map a log entry (localStorage format) to the payload the script expects
+function entryPayload(entry, profileName) {
+  return {
+    action: 'log',
+    profile: profileName,
+    id: entry.id,
+    date: entry.date,
+    prayer: entry.prayer || 'Fajr',
+    // new field names the Apps Script uses
+    startSurahN:    entry.sN,
+    startSurahName: entry.sName,
+    fromAyah:       entry.fa,
+    endSurahN:      entry.eN   || entry.sN,
+    endSurahName:   entry.eName || entry.sName,
+    toAyah:         entry.ta,
+    startPage:      entry.sp,
+    endPage:        entry.ep,
+    pages:          entry.pages,
+    notes:          entry.notes || ''
+  };
+}
+
+async function syncAllToSheet() {
+  const p = getP(); if (!p) return;
+  const url = localStorage.getItem('tq2_gs'); if (!url) return;
+  updateSyncStatus('syncing');
+  const res = await postToSheet({
+    action: 'sync',
+    profile: p.name,
+    logs: p.logs.map(l => ({
+      id: l.id, date: l.date, prayer: l.prayer || 'Fajr',
+      startSurahN: l.sN, startSurahName: l.sName, fromAyah: l.fa,
+      endSurahN: l.eN || l.sN, endSurahName: l.eName || l.sName, toAyah: l.ta,
+      startPage: l.sp, endPage: l.ep, pages: l.pages, notes: l.notes || ''
+    }))
+  });
+  if (res && res.status === 'ok') {
+    const ts = new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem('tq2_gs_lastsync', ts);
+    updateSyncStatus('connected');
+    toast(`✓ Synced ${p.logs.length} sessions to Google Sheets`);
+  } else {
+    updateSyncStatus('error');
+    toast('⚠️ Sync failed — check your Apps Script URL');
+  }
+}
+
+function updateSyncStatus(state) {
+  const dot = document.getElementById('gsDot');
+  const txt = document.getElementById('gsTxt');
+  const hDot = document.getElementById('hGsDot');
+  const hSub = document.getElementById('hGsSub');
+  if (state === 'connected') {
+    const ts = localStorage.getItem('tq2_gs_lastsync') || 'just now';
+    if (dot) { dot.style.background = 'var(--grn)'; }
+    if (txt) { txt.style.color = 'var(--grn)'; txt.textContent = 'Connected'; }
+    if (hDot) hDot.style.background = 'var(--grn)';
+    if (hSub) hSub.textContent = `Connected · last sync ${ts}`;
+  } else if (state === 'syncing') {
+    if (dot) { dot.style.background = 'var(--gold)'; }
+    if (txt) { txt.style.color = 'var(--gold)'; txt.textContent = 'Syncing…'; }
+  } else if (state === 'error') {
+    if (dot) { dot.style.background = '#e84040'; }
+    if (txt) { txt.style.color = '#e84040'; txt.textContent = 'Sync failed'; }
+  } else {
+    if (dot) { dot.style.background = 'var(--muted)'; }
+    if (txt) { txt.style.color = 'var(--muted)'; txt.textContent = 'Not connected'; }
+  }
+}
+
+async function connectGs() {
+  const url = document.getElementById('gsUrl').value.trim();
+  if (!url) { alert('Please enter a URL.'); return; }
+  if (!url.includes('script.google.com')) {
+    alert('Please paste the Apps Script Web App URL (not the Google Sheet URL). It should look like: https://script.google.com/macros/s/.../exec');
+    return;
+  }
+  localStorage.setItem('tq2_gs', url);
+  updateSyncStatus('connected');
+  toast('✓ Connected! Syncing all sessions now…');
+  // Full sync on connect
+  await syncAllToSheet();
+}
+
+async function syncNow() {
+  const url = localStorage.getItem('tq2_gs');
+  if (!url) { toast('⚠️ No Google Sheet connected yet.'); return; }
+  await syncAllToSheet();
+}
+
+function openGs() {
+  const sheetUrl = localStorage.getItem('tq2_gs_sheet');
+  if (sheetUrl) {
+    window.open(sheetUrl, '_blank');
+  } else {
+    // No prompt() — guide user to the input field that already exists in Stats
+    toast('⚠️ Paste your Sheet URL in Stats → Google Sheet URL → Save');
+    goTab('stats');
+    setTimeout(() => {
+      const el = document.getElementById('gsSheetUrl');
+      if (el) el.focus();
+    }, 400);
+  }
+}
+
+function saveSheetUrl() {
+  const url = document.getElementById('gsSheetUrl').value.trim();
+  if (!url) { alert('Please paste your Google Sheet URL.'); return; }
+  if (!url.includes('docs.google.com')) {
+    alert('Please paste the Google Sheet URL (from docs.google.com), not the Apps Script URL.');
+    return;
+  }
+  localStorage.setItem('tq2_gs_sheet', url);
+  toast('✓ Sheet URL saved — Open Sheet will now go to your spreadsheet.');
+}
+
+// Close dropdown on outside tap
+document.addEventListener('click',e=>{if(!e.target.closest('.ss-wrap'))document.getElementById('ssDd').classList.remove('open');if(!e.target.closest('#ssInputEnd')&&!e.target.closest('#ssDdEnd'))document.getElementById('ssDdEnd').classList.remove('open');if(!e.target.closest('#setupSurahInput')&&!e.target.closest('#setupSsDd'))document.getElementById('setupSsDd').classList.remove('open');if(!e.target.closest('#editSurahInput')&&!e.target.closest('#editSsDd'))document.getElementById('editSsDd').classList.remove('open');});
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  // Set version display from constant
+  const vd = document.getElementById('versionDisplay');
+  if (vd) vd.textContent = `v${APP_VERSION} · ${BUILD_DATE}`;
+  // Migration: ensure all profiles have startPg field (older saves may not)
+  // Also recompute totalPg from actual log end pages for profiles saved with
+  // the old additive method (which gave wrong Juz grid for mid-Quran starts).
+  profiles.forEach(p=>{
+    if(p.startPg===undefined) p.startPg=0;
+    if(p.startSurahN===undefined){ p.startSurahN=p.curSurahN||1; p.startAyah=p.curAyah||1; }
+    if(p.logs && p.logs.length>0){
+      const maxEp = p.logs.reduce((m,l) => Math.max(m, l.ep||0), p.startPg||0);
+      p.totalPg = Math.min(604, maxEp);
+    }
+  });
+  save();
+  console.log(`[Tilawah v${APP_VERSION}] App loaded. Profiles: ${profiles.length}`);
+  if(profiles.length) profiles.forEach(p=>console.log(`  Profile: ${p.name}, totalPg: ${p.totalPg}, startPg: ${p.startPg}`));
+  renderSetup();
+  if(activeId&&profiles.find(p=>p.id===activeId))showApp();
+});
+</script>
+</body>
+</html>
