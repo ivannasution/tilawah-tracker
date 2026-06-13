@@ -13,7 +13,7 @@ Dibuat untuk rutinitas Fajr, 2–4 halaman per hari.
 ### 📖 Log Sesi
 - Pilih waktu shalat (Fajr / Dzuhur / Asr / Maghrib / Isya / Other)
 - Tanggal bisa diubah untuk log retrospektif
-- Input surah awal + ayah awal, surah akhir + ayah akhir
+- Input surah awal + ayat awal, surah akhir + ayat akhir
 - Mendukung **cross-surah** (baca lebih dari satu surah dalam satu sesi)
 - Kalkulasi halaman otomatis berdasarkan tabel batas halaman Mushaf Utsmani
 - Override halaman manual jika diperlukan
@@ -43,7 +43,7 @@ Dibuat untuk rutinitas Fajr, 2–4 halaman per hari.
 
 ### 📋 Riwayat & Edit
 - Semua sesi tersimpan dengan detail lengkap
-- Edit sesi yang sudah dilog (surah, ayah, halaman, tanggal, catatan)
+- Edit sesi yang sudah dilog (surah, ayat, halaman, tanggal, catatan)
 - Hapus sesi individual
 - Clear log dengan konfirmasi ganda
 
@@ -65,31 +65,47 @@ Tidak perlu daftar akun. Semua data tersimpan di perangkat (localStorage).
 
 ## Setup Google Sheets Sync (Opsional)
 
-Untuk sync data ke Google Sheets agar bisa diakses dari mana saja:
+Untuk sync data ke Google Sheets agar bisa diakses dari mana saja. **Header kolom dibuat otomatis** — tidak perlu setup manual.
 
-### 1. Buat Google Sheet baru
-Buka [Google Sheets](https://sheets.google.com) → buat spreadsheet baru → beri nama misalnya "Quran Tilawah Tracker".
+### 1. Buat Google Sheet kosong
+Buka [Google Sheets](https://sheets.google.com) → buat spreadsheet baru → beri nama bebas (misalnya "Quran Tilawah Tracker").
 
 ### 2. Buat Apps Script
-Di Google Sheet → **Extensions → Apps Script** → hapus semua kode yang ada → paste kode dari file [`tilawah-apps-script.js`](tilawah-apps-script.js) → Save.
+Di Google Sheet → **Extensions → Apps Script** → hapus semua kode yang ada → paste seluruh isi file [`tilawah-apps-script.js`](tilawah-apps-script.js) → Save (Ctrl+S).
 
 ### 3. Deploy sebagai Web App
 Di Apps Script → **Deploy → New deployment** → pilih tipe **Web app** → atur:
 - Execute as: **Me**
 - Who has access: **Anyone**
 
-Klik Deploy → copy URL yang muncul (bentuknya `https://script.google.com/macros/s/.../exec`).
+Klik **Deploy** → copy URL yang muncul (`https://script.google.com/macros/s/.../exec`).
 
-### 4. Hubungkan di app
-Buka app → tab **Stats** → tempel URL Apps Script di kolom "Apps Script Web App URL" → klik **Connect**.
+### 4. Hubungkan di app — sheet siap otomatis
+Buka app → tab **Stats** → tempel URL Apps Script → klik **Connect**.
 
-Tempel juga URL Google Sheet di kolom "Google Sheet URL" → klik **Save** (untuk tombol Open Sheet).
+App akan otomatis:
+- Membuat sheet **Log** dan **Stats** di spreadsheet kamu
+- Menulis semua header kolom yang diperlukan
+- Langsung sync semua data yang ada
 
-### Kolom Log Sheet (A–N)
+Tidak perlu membuat header secara manual.
+
+### 5. (Opsional) Tombol Open Sheet
+Tempel URL Google Sheet di kolom "Google Sheet URL" → klik **Save** — supaya tombol Open Sheet membuka spreadsheet langsung.
+
+### Struktur kolom (dibuat otomatis)
+
+**Log sheet (A–N):**
 `id · date · prayer · profile · startSurahN · startSurahName · fromAyah · endSurahN · endSurahName · toAyah · startPage · endPage · pages · notes`
 
-### Kolom Stats Sheet (A–I)
+**Stats sheet (A–I):**
 `profile · totalPages · pagesLeft · percent · avgPagesPerDay · sessions · daysLogged · prayerBreakdown · lastSync`
+
+### Sinkronisasi multi-device
+- **↑ Sync Now** — kirim data dari perangkat ini ke Sheet
+- **↓ Pull from Sheet** — ambil data terbaru dari Sheet ke perangkat ini
+
+Workflow multi-device: log di HP → otomatis push ke Sheet → buka di Desktop → tap Pull from Sheet → Desktop sinkron.
 
 ---
 
@@ -107,6 +123,8 @@ Tempel juga URL Google Sheet di kolom "Google Sheet URL" → klik **Save** (untu
 
 | Versi | Tanggal | Perubahan |
 |-------|---------|-----------|
+| v1.4.5 | 2026-06-13 | Auto-init Google Sheet saat Connect: header Log & Stats dibuat otomatis, tidak perlu setup manual |
+| v1.4.4 | 2026-06-13 | Pull from Sheet: sinkronisasi dua arah untuk multi-device |
 | v1.4.3 | 2026-06-13 | Fix stats GSheet: totalPages dan pagesLeft kini pakai posisi nyata dari app (termasuk starting position), bukan hanya jumlah halaman dari sesi log |
 | v1.4.2 | 2026-06-13 | Fix Juz grid: totalPg kini dihitung dari end page aktual sesi, bukan akumulasi — profil tanpa starting position kini menampilkan Juz yang benar |
 | v1.4.1 | 2026-06-13 | Fix openGs() tidak lagi pakai browser prompt; fix confirmClear() reset ke starting position awal profil; version string dari konstanta |
@@ -121,7 +139,8 @@ Tempel juga URL Google Sheet di kolom "Google Sheet URL" → klik **Save** (untu
 ## Rencana Berikutnya
 
 - [ ] PWA manifest + service worker (offline install yang sesungguhnya)
-- [ ] Pull from GSheet (sync dua arah untuk multi-device)
+- [x] Pull from Sheet — sync dua arah untuk multi-device ✅
+- [x] Auto-init Google Sheet saat Connect ✅
 - [ ] Notifikasi pengingat harian
 
 ---
